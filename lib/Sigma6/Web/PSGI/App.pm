@@ -1,6 +1,8 @@
 package Sigma6::Web::PSGI::App;
 use Moose;
 
+# Most of this package was stole from Miyagawa's Piglet
+
 sub import {
     my $class = shift;
     my %args  = @_;

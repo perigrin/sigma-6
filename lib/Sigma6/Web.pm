@@ -2,6 +2,9 @@ package Sigma6::Web;
 use Moose::Exporter;
 our $VERSION = '0.01';
 use namespace::clean;
+
+# Most of this package was stole from Miyagawa's Tigger
+
 use Try::Tiny;
 use Moose::Util::TypeConstraints;
 use Plack::Request;
@@ -79,3 +82,5 @@ sub psgify {
         }
     );
 }
+1;
+__END__

@@ -1,5 +1,8 @@
 package Sigma6::Web::Routes;
 use Moose;
+
+# Most of this package was stole from Miyagawa's Piglet
+
 use Encode ();
 use Router::Simple;
 use Plack::Util::Accessor qw(encoding);
