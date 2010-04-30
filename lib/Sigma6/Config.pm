@@ -1,9 +1,8 @@
 package Sigma6::Config;
-use 5.010;
 use strict;
 our $VERISON = '0.01';
-use Bread::Board;
-use namespace::autoclean;
+use Bread::Board 0.13;
+use namespace::autoclean 0.09;
 
 sub _container {
     state $c = container 'Sigma6' => as {

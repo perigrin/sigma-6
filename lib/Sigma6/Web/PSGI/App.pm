@@ -1,5 +1,7 @@
 package Sigma6::Web::PSGI::App;
-use Moose;
+use Moose 1.01;
+our $VERSION = '0.01';
+use namespace::autoclean 0.09;
 
 # Most of this package was stole from Miyagawa's Piglet
 

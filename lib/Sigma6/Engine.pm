@@ -1,8 +1,9 @@
 package Sigma6::Engine;
-use Moose;
-our $VERISON = '0.01';
+use Moose 1.01;
+our $VERSION = '0.01';
+use namespace::autoclean 0.09;
+
 use MooseX::Types::Path::Class qw(File);
-use namespace::autoclean;
 with qw(MooseX::Workers);
 
 has repo         => ( isa => 'Str', is => 'ro', required => 1 );
