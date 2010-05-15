@@ -3,7 +3,12 @@ use Moose 1.01;
 our $VERISON = '0.01';
 use namespace::autoclean 0.09;
 use Sigma6::Web;
-use aliased 'Sigma6::Config';
+use Sigma6::Config;
+
+use Sub::Exporter::ForMethods qw( method_installer );
+use Data::Section { installer => method_installer },
+  -setup => { default_name => 'index' };
+use Template::Tiny;
 
 resource '/' => (
     get  => \&get_index,
@@ -11,23 +16,18 @@ resource '/' => (
 );
 
 sub get_index {
-    my $engine = Config->engine->status;
-    my $pkg    = __PACKAGE__;
-    return qq[
-<html>
-    <head><title>$pkg</title></head>
-    <body>
-        <h1>$$engine{status}</h1>
-        <form method="POST" action=""><input type='submit' value='Build Now!'/></form>
-        <pre>$$engine{build_status}</pre>
-    </body>
-</html>    
-    ]
+    my $template = __PACKAGE__->section_data('index');
+    my $conf     = {
+        manager => manager->status,
+        name    => __PACKAGE__,
+    };
+    Template::Tiny->new->process( $template, $conf, \my $output );
+    return $output;
 }
 
 sub post_index {
     my $response = new_response;
-    Config->engine->start_build;
+    manager->start_build;
     $response->redirect('/');
     $response->finalize;
 }
@@ -35,4 +35,13 @@ sub post_index {
 sub run_psgi { run }
 
 1;
-__END__
+__DATA__
+<html>
+    <head><title>[% name %]</title></head>
+    <body>
+        <h1>[% manager.repo %]</h1>
+        <h2>[% manager.status %]</h2>
+        <form method="POST" action=""><input type='submit' value='Build Now!'/></form>
+        <pre>[% manager.build_status %]</pre>
+    </body>
+</html>

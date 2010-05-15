@@ -8,6 +8,7 @@ use namespace::autoclean 0.09;
 use Try::Tiny;
 use Moose::Util::TypeConstraints;
 use Plack::Request;
+use Plack::Response;
 use Sigma6::Web::Routes;
 use Plack::Middleware::HTTPExceptions;
 
