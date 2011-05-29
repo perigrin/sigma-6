@@ -1,8 +1,0 @@
-#!/usr/bin/env perl
-use strict;
-use lib qw(lib);
-use Sigma6::Runner;
-
-my $runner = Sigma6::Runner->new;
-$runner->parse_options(@ARGV);
-$runner->run;
