@@ -1,10 +1,10 @@
 #!/usr/bin/env perl
 use Sigma6;
+use Config::Tiny;
 
-my $app = Sigma6->new(
-    target    => $ENV{SIGMA6_TARGET},
-    build_cmd => $ENV{SIGMA6_BUILD},
-);
+my $c = Config::Tiny->new->read('sigma6.ini');
+
+my $app = Sigma6->new($c);
 
 my $handler = sub { $app->run_psgi(@_) };
 
