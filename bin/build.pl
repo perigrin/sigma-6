@@ -1,10 +1,15 @@
 #!/usr/bin/env perl
 package Sigma6::Smoker::script;
+$|++;
 use strict;
 
 use Getopt::Long 2.33 qw(:config gnu_getopt);
 use Pod::Usage;
+use Cwd qw(chdir);
+
 use Config::Tiny;
+use Git::Repository;
+use Capture::Tiny qw(tee_merged);
 
 my $conf = {};
 
@@ -24,8 +29,13 @@ if ( $conf->{file} ) {
     $conf = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
-use Data::Dumper;
-die Dumper $conf;
+Git::Repository->run( clone => $target => $dir );
+my $repo = Git::Repository->new( work_tree => $dir );
+
+my $start = getcwd;
+chdir $dir;
+tee_merged $conf->{command};
+chdir $start;
 
 __END__
 
