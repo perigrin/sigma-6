@@ -5,7 +5,7 @@ use strict;
 
 use Getopt::Long 2.33 qw(:config gnu_getopt);
 use Pod::Usage;
-use Cwd qw(chdir);
+use Cwd qw(chdir getcwd);
 
 use Config::Tiny;
 use Git::Repository;
@@ -14,11 +14,12 @@ use Capture::Tiny qw(tee_merged);
 my $conf = {};
 
 GetOptions(
-    'config=s' => \$conf->{file},
-    'target=s' => \$conf->{target},
-    'dir=s'    => \$conf->{dir},
-    'cmd=s'    => \$conf->{command},
-    man        => sub { pod2usage( -verbose => 2 ) },
+    'config=s'              => \$conf->{file},
+    'target=s'              => \$conf->{target},
+    'dir=s'                 => \$conf->{dir},
+    'deps-command|deps=s'   => \$conf->{deps_command},
+    'build-command|build=s' => \$conf->{build_command},
+    man                     => sub { pod2usage( -verbose => 2 ) },
 );
 
 for ( keys %$conf ) {
@@ -29,13 +30,17 @@ if ( $conf->{file} ) {
     $conf = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
-Git::Repository->run( clone => $target => $dir );
-my $repo = Git::Repository->new( work_tree => $dir );
+Git::Repository->run( clone => $conf->{target} => $conf->{dir} );
+my $repo = Git::Repository->new( work_tree => $conf->{dir} );
 
 my $start = getcwd;
-chdir $dir;
-tee_merged $conf->{command};
+chdir $conf->{dir};
+tee_merged sub {
+    system $conf->{deps_command};
+    system 'PERL5LIB=$PERL5LIB:perl5/lib/perl5 '. $conf->{build_command};
+};
 chdir $start;
+unlink $conf->{dir};
 
 __END__
 
