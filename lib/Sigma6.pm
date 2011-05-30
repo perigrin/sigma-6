@@ -5,7 +5,6 @@ use warnings;
 # ABSTRACT: like CIJoe but with 100% more Awesome
 
 use Template::Tiny;
-use HTTP::Tiny;
 
 my $TEMPLATE = do { local $/; <DATA> };   # emulate state variables for perl 5.8
 
@@ -83,3 +82,16 @@ __DATA__
         <p>[% o.status %]</p>
     </body>
 </html>
+
+=head1 DEPENDENCIES
+
+Capture::Tiny 
+Config::Tiny 
+Git::Repository
+Template::Tiny
+
+Cwd was first released with perl 5
+ExtUtils::MakeMaker was first released with perl 5
+Getopt::Long was first released with perl 5
+Pod::Usage was first released with perl v5.6.0
+Test::More was first released with perl v5.6.2
