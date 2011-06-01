@@ -31,7 +31,7 @@ sub to_app {
 
 sub _501 {
     return [
-        404,
+        501,
         [ "Content-Type", "text/plain" ],
         ["Sorry that method is not implemented for this resource"],
     ];
