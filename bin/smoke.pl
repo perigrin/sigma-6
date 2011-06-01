@@ -2,6 +2,8 @@
 package Sigma6::Smoker::script;
 $|++;
 use strict;
+use lib qw(lib);
+use lib qw(perl5/lib/perl5);
 
 use Getopt::Long 2.33 qw(:config gnu_getopt);
 use Pod::Usage;
@@ -9,7 +11,7 @@ use Cwd qw(chdir getcwd);
 
 use Config::Tiny;
 use Git::Repository;
-use Capture::Tiny qw(tee_merged);
+use Capture::Tiny qw(capture_merged);
 
 my $conf = {};
 
@@ -30,17 +32,21 @@ if ( $conf->{file} ) {
     $conf = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
-Git::Repository->run( clone => $conf->{target} => $conf->{dir} );
+unless ( -e $conf->{dir} ) {
+    Git::Repository->run( clone => $conf->{target} => $conf->{dir} );
+}
+
 my $repo = Git::Repository->new( work_tree => $conf->{dir} );
+$repo->run('pull');
 
 my $start = getcwd;
 chdir $conf->{dir};
-tee_merged sub {
+my $output = capture_merged sub {
     system $conf->{deps_command};
-    system 'PERL5LIB=$PERL5LIB:perl5/lib/perl5 '. $conf->{build_command};
+    system 'PERL5LIB=$PERL5LIB:perl5/lib/perl5 ' . $conf->{build_command};
 };
+$repo->run( 'notes', 'add', '-fm', $output, 'HEAD');
 chdir $start;
-unlink $conf->{dir};
 
 __END__
 

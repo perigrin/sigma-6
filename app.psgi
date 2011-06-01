@@ -4,8 +4,6 @@ use Config::Tiny;
 
 my $c = Config::Tiny->new->read('sigma6.ini');
 
-my $app = Sigma6->new($c);
-
-my $handler = sub { $app->run_psgi(@_) };
+my $handler = Sigma6->new($c)->to_app; 
 
 __END__
