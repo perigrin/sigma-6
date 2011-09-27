@@ -80,9 +80,8 @@ sub _check_build {
     }
     my $repo = Git::Repository->new( work_tree => $self->{build}{dir} );
     $self->{status} = $repo->run( 'notes', 'show', 'HEAD' );
-    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0,
-        6;
-    $self->{repo}{description} = $repo->run( 'log', '--oneline', '-1' );
+    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0, 6;
+    $self->{repo}{description} = $repo->run('log', '--oneline', '-1');
     $self->{status} ||= 'No smoke results.';
     return;
 }
