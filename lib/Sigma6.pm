@@ -17,19 +17,14 @@ sub new {
 sub run_psgi {
     my ( $self, $env ) = @_;
     $env->{'sigma6.path'} = $env->{PATH_INFO} || '/';
-    return $self->_404 unless $env->{'sigma6.path'} eq '/';
+    return $self->HTTP_404 unless $env->{'sigma6.path'} eq '/';
     if ( my $method = $self->can( $env->{REQUEST_METHOD} ) ) {
         return $self->$method($env);
     }
-    return $self->_501;
+    return $self->HTTP_501;
 }
 
-sub to_app {
-    my $self = shift;
-    return sub { $self->run_psgi(@_) };
-}
-
-sub _501 {
+sub HTTP_501 {
     return [
         501,
         [ "Content-Type", "text/plain" ],
@@ -38,7 +33,7 @@ sub _501 {
 
 }
 
-sub _404 {
+sub HTTP_404 {
     return [
         404,
         [ "Content-Type", "text/plain" ],
@@ -46,10 +41,15 @@ sub _404 {
     ];
 }
 
+sub HTTP_302 {
+    my ( $self, $url ) = @_;
+    return [ 302, [ 'Location', $url ], [] ];
+}
+
 sub POST {
     my $self = shift;
     if ( my $pid = fork ) {    # return a 302 to GET /
-        return [ 302, [ 'Location', '/' ], [] ];
+        return $self->HTTP_302('/');
     }
     elsif ( defined $pid ) {    # kick off the build server
         exec( 'bin/smoke.pl', '--config', $self->{server}{smoker_config} );
@@ -68,7 +68,7 @@ sub GET {
         { o => {%$self}, },
         \( my $output )
     );
-    return [ 404, [ "Content-Type", "text/html" ], [$output], ];
+    return [ 200, [ "Content-Type", "text/html" ], [$output], ];
 }
 
 sub _check_build {
@@ -80,8 +80,9 @@ sub _check_build {
     }
     my $repo = Git::Repository->new( work_tree => $self->{build}{dir} );
     $self->{status} = $repo->run( 'notes', 'show', 'HEAD' );
-    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0, 6;
-
+    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0,
+        6;
+    $self->{repo}{description} = $repo->run( 'log', '--oneline', '-1' );
     $self->{status} ||= 'No smoke results.';
     return;
 }
@@ -91,11 +92,14 @@ sub _template {
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Sigma6: [% o.repo.head_sha1 %]</title>
+        <title>Sigma6: [% o.build.target %]</title>
     </head>
     <body>
         <h1>Build [% o.repo.head_sha1 %]</h1>
-        <p>Building: <a href="[% o.build.target %]">[% o.build.target %]</a>
+	<p><i>[% o.repo.description %]</i></p>
+        <p>Building: <a href="[% o.build.target %]">[% o.build.target %]</a></p>
+        <p>Dep Command: [% o.build.deps_command %]</p>
+        <p>Build Command:  [% o.build.build_command %]</p>
         <form action="/" method="POST"><input type="submit" value="Build"/></form>
         <div><pre><code>[% o.status %]</code></pre></div>
     </body>
