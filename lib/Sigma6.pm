@@ -109,7 +109,7 @@ sub _template {
 1;
 __END__
 
-=head1 Sigma6
+=head1 NAME Sigma6
 
 CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra
 

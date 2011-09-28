@@ -1,6 +1,5 @@
 #!/usr/bin/env perl
 package Sigma6::Smoker::script;
-$|++;
 use strict;
 use lib qw(lib);
 use lib qw(perl5/lib/perl5);
@@ -10,8 +9,6 @@ use Pod::Usage;
 use Cwd qw(chdir getcwd);
 
 use Config::Tiny;
-use Git::Repository;
-use Capture::Tiny qw(capture_merged);
 
 my $conf = {};
 
@@ -25,32 +22,19 @@ GetOptions(
 );
 
 for ( keys %$conf ) {
-    delete $conf->{$_} unless $conf->{$_};    # clear out the fake false values
+    delete $conf->{$_} unless $conf->{$_};   # clear out the fake false values
 }
 
 if ( $conf->{file} ) {
-    $conf = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
+    $conf
+        = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
-unless ( -e $conf->{temp_dir} ) {
-    Git::Repository->run( clone => $conf->{target} => $conf->{temp_dir} );
-}
-
-my $repo = Git::Repository->new( work_tree => $conf->{temp_dir} );
-$repo->run('pull');
-
-my $start = getcwd;
-chdir $conf->{temp_dir};
-my $output = capture_merged sub {
-    system $conf->{deps_command};
-    system 'PERL5LIB=$PERL5LIB:perl5/lib/perl5 ' . $conf->{build_command};
-};
-$repo->run( 'notes', 'add', '-fm', $output, 'HEAD');
-chdir $start;
+Sigma6::Smoke->new($conf)->run();
 
 __END__
 
-=head1 Sigma6 Smoker
+=head1 NAME smoke.pl
 
 Sigma6 ... like CIJoe but with 100% more Awesome
 
