@@ -1,0 +1,27 @@
+---
+abstract: 'CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra'
+author:
+  - 'Chris Prather <chris@prather.org>'
+build_requires:
+  Test::More: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.30
+dynamic_config: 0
+generated_by: 'Dist::Zilla version 4.300002, CPAN::Meta::Converter version 2.112150'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Sigma6
+requires:
+  Capture::Tiny: 0
+  Carp: 0
+  Config::Tiny: 0
+  Cwd: 0
+  Getopt::Long: 2.33
+  Git::Repository: 0
+  Pod::Usage: 0
+  Template::Tiny: 0
+  strict: 0
+  warnings: 0
+version: 0.001

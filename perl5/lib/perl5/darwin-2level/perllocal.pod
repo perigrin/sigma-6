@@ -1,0 +1,66 @@
+=head2 Wed Jun  1 03:16:31 2011: C<Module> L<Capture::Tiny|Capture::Tiny>
+
+=over 4
+
+=item *
+
+C<installed into: /Users/perigrin/dev/perigrin/sigma-6/perl5/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.11>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
+=head2 Wed Jun  1 03:16:33 2011: C<Module> L<Config::Tiny|Config::Tiny>
+
+=over 4
+
+=item *
+
+C<installed into: /Users/perigrin/dev/perigrin/sigma-6/perl5/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 2.14>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+
+=head2 Wed Jun  1 03:16:47 2011: C<Module> L<Template::Tiny|Template::Tiny>
+
+=over 4
+
+=item *
+
+C<installed into: /Users/perigrin/dev/perigrin/sigma-6/perl5/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.11>
+
+=item *
+
+C<EXE_FILES: >
+
+=back
+

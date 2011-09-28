@@ -1,4 +1,7 @@
 package Sigma6;
+{
+  $Sigma6::VERSION = '0.001';
+}
 use strict;
 use warnings;
 
