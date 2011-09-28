@@ -31,3 +31,27 @@ sub run {
     $repo->run( 'notes', 'add', '-fm', $output, 'HEAD' );
     chdir $start;
 }
+
+1;
+__END__
+
+
+=head1 NAME Sigma6::Smoke
+
+=head1 SYNOPSIS
+
+=head1 VERSION
+
+version 0.001
+
+    my $smoker = Sigma6::Smoke->new(
+        target        => 'git@github.com:perigrin/sigma-6.git',
+        temp_dir      => '/tmp/sigma6',
+        deps_command  => 'dzil listdeps | cpanm -L perl5',
+        build_command => 'dzil smoke --automated',
+    );
+    $smoker->run();
+
+=head1 DESCRIPTION
+
+The default smoker for Sigma6. 

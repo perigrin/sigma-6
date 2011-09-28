@@ -112,9 +112,13 @@ sub _template {
 1;
 __END__
 
-=head1 Sigma6
+=head1 NAME Sigma6
 
 CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra
+
+=head1 VERSION
+
+version 0.001
 
 =head1 SYNOPSIS
 
@@ -136,4 +140,3 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 Sigma6 is a Continuous Integration Application originally based upon CIJoe
 (https://github.com/defunkt/cijoe). At the moment we're still worrying about
 getting it to self-host.
-

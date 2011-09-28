@@ -37,9 +37,13 @@ Sigma6::Smoke->new($conf)->run();
 
 __END__
 
-=head1 Sigma6 Smoker
+=head1 NAME smoke.pl
 
 Sigma6 ... like CIJoe but with 100% more Awesome
+
+=head1 VERSION
+
+version 0.001
 
 =head1 SYNOPSIS
 
