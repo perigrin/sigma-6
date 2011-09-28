@@ -52,7 +52,7 @@ sub POST {
         return $self->HTTP_302('/');
     }
     elsif ( defined $pid ) {    # kick off the build server
-        exec( 'bin/smoke.pl', '--config', $self->{server}{smoker_config} );
+        exec( $self->{server}{smoker_command}, '--config', $self->{server}{smoker_config} );
         exit;
     }
     else {                      # something funky happened
@@ -73,12 +73,12 @@ sub GET {
 
 sub _check_build {
     my $self = shift;
-    unless ( -e $self->{build}{dir} ) {
+    unless ( -e $self->{build}{temp_dir} ) {
         $self->{repo}{head_sha1} = '[unknown]';
         $self->{status} = 'Repository work tree missing. Kick off a build.';
         return;
     }
-    my $repo = Git::Repository->new( work_tree => $self->{build}{dir} );
+    my $repo = Git::Repository->new( work_tree => $self->{build}{temp_dir} );
     $self->{status} = $repo->run( 'notes', 'show', 'HEAD' );
     $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0, 6;
     $self->{repo}{description} = $repo->run('log', '--oneline', '-1');

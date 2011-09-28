@@ -18,7 +18,7 @@ my $conf = {};
 GetOptions(
     'config=s'              => \$conf->{file},
     'target=s'              => \$conf->{target},
-    'dir=s'                 => \$conf->{dir},
+    'temp_dir=s'            => \$conf->{temp_dir},
     'deps-command|deps=s'   => \$conf->{deps_command},
     'build-command|build=s' => \$conf->{build_command},
     man                     => sub { pod2usage( -verbose => 2 ) },
@@ -32,15 +32,15 @@ if ( $conf->{file} ) {
     $conf = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
-unless ( -e $conf->{dir} ) {
-    Git::Repository->run( clone => $conf->{target} => $conf->{dir} );
+unless ( -e $conf->{temp_dir} ) {
+    Git::Repository->run( clone => $conf->{target} => $conf->{temp_dir} );
 }
 
-my $repo = Git::Repository->new( work_tree => $conf->{dir} );
+my $repo = Git::Repository->new( work_tree => $conf->{temp_dir} );
 $repo->run('pull');
 
 my $start = getcwd;
-chdir $conf->{dir};
+chdir $conf->{temp_dir};
 my $output = capture_merged sub {
     system $conf->{deps_command};
     system 'PERL5LIB=$PERL5LIB:perl5/lib/perl5 ' . $conf->{build_command};
