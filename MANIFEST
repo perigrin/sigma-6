@@ -16,6 +16,13 @@ dist.ini
 eg/sigma6.ini
 lib/Sigma6.pm
 lib/Sigma6/Smoke.pm
+perl5/bin/local-lib-helper
+perl5/bin/localenv
+perl5/bin/localenv-bashrc
+perl5/bin/localenv-cshrc
+perl5/bin/localenv-relative
+perl5/lib/perl5/App/local/lib/helper.pm
+perl5/lib/perl5/App/local/lib/helper/rationale.pod
 perl5/lib/perl5/Capture/Tiny.pm
 perl5/lib/perl5/Config/Tiny.pm
 perl5/lib/perl5/Git/Repository.pm
@@ -28,5 +35,8 @@ perl5/lib/perl5/System/Command.pm
 perl5/lib/perl5/Template/Tiny.pm
 perl5/lib/perl5/Test/Git.pm
 perl5/lib/perl5/darwin-2level/perllocal.pod
+perl5/man/man1/local-lib-helper.1
+perl5/man/man3/App::local::lib::helper.3
+perl5/man/man3/App::local::lib::helper::rationale.3
 sigma6.ini
 t/00-load.t

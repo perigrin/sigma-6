@@ -64,3 +64,25 @@ C<EXE_FILES: >
 
 =back
 
+=head2 Wed Sep 28 00:58:05 2011: C<Module> L<App::local::lib::helper|App::local::lib::helper>
+
+=over 4
+
+=item *
+
+C<installed into: /Users/perigrin/dev/perigrin/sigma-6/perl5/lib/perl5>
+
+=item *
+
+C<LINKTYPE: dynamic>
+
+=item *
+
+C<VERSION: 0.06>
+
+=item *
+
+C<EXE_FILES: script/local-lib-helper>
+
+=back
+
