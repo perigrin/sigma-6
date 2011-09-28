@@ -6,9 +6,8 @@ use lib qw(perl5/lib/perl5);
 
 use Getopt::Long 2.33 qw(:config gnu_getopt);
 use Pod::Usage;
-use Cwd qw(chdir getcwd);
-
 use Config::Tiny;
+use Sigma6::Smoke;
 
 my $conf = {};
 

@@ -2,6 +2,7 @@ package Sigma6::Smoke;
 use strict;
 
 use Git::Repository;
+use Cwd qw(chdir getcwd);
 use Capture::Tiny qw(capture_merged);
 
 sub new {
