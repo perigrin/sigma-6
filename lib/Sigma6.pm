@@ -52,7 +52,7 @@ sub POST {
         return $self->HTTP_302('/');
     }
     elsif ( defined $pid ) {    # kick off the build server
-        exec( $self->{server}{smoker_command}, '--config', $self->{server}{smoker_config} );
+        exec( $self->{server}{smoker_command} );
         exit;
     }
     else {                      # something funky happened
@@ -74,14 +74,16 @@ sub GET {
 sub _check_build {
     my $self = shift;
     unless ( -e $self->{build}{temp_dir} ) {
+
         $self->{repo}{head_sha1} = '[unknown]';
         $self->{status} = 'Repository work tree missing. Kick off a build.';
         return;
     }
     my $repo = Git::Repository->new( work_tree => $self->{build}{temp_dir} );
     $self->{status} = $repo->run( 'notes', 'show', 'HEAD' );
-    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0, 6;
-    $self->{repo}{description} = $repo->run('log', '--oneline', '-1');
+    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0,
+        6;
+    $self->{repo}{description} = $repo->run( 'log', '--oneline', '-1' );
     $self->{status} ||= 'No smoke results.';
     return;
 }
@@ -130,7 +132,9 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 
 =head1 DESCRIPTION
 
-Sigma6 is a Continuous Integration Application originally based upon CIJoe
-(https://github.com/defunkt/cijoe). At the moment we're still worrying about
-getting it to self-host.
+Sigma6 is a Continuous Integration application originally based upon
+CIJoe. It should be self-hosting now but that hasn't really been pushed.
+Additionally the tests are woefully lacking, and you're reading all of the
+documentation there is. That said, it's under 200 lines of code, you should
+just read that.
 

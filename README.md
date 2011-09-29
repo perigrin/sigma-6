@@ -22,7 +22,7 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 Sigma6 is a Continuous Integration application originally based upon
 [CIJoe][1]. It should be self-hosting now but that hasn't really been pushed.
 Additionally the tests are woefully lacking, and you're reading all of the
-documentation there is. That said, it's only 138 lines of code, you should
+documentation there is. That said, it's under 200 lines of code, you should
 just read that.
 
 [1]: https://github.com/defunkt/cijoe

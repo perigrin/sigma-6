@@ -7,14 +7,14 @@ use lib qw(perl5/lib/perl5);
 use Getopt::Long 2.33 qw(:config gnu_getopt);
 use Pod::Usage;
 use Config::Tiny;
-use Sigma6::Smoke;
+use Sigma6::Smoker;
 
 my $conf = {};
 
 GetOptions(
     'config=s'              => \$conf->{file},
     'target=s'              => \$conf->{target},
-    'temp_dir=s'            => \$conf->{temp_dir},
+    'temp-dir=s'            => \$conf->{temp_dir},
     'deps-command|deps=s'   => \$conf->{deps_command},
     'build-command|build=s' => \$conf->{build_command},
     man                     => sub { pod2usage( -verbose => 2 ) },
@@ -29,7 +29,7 @@ if ( $conf->{file} ) {
         = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
-Sigma6::Smoke->new($conf)->run();
+Sigma6::Smoker->new($conf)->run();
 
 __END__
 
