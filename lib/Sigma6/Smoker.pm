@@ -51,7 +51,7 @@ sub run {
     $self->setup_workspace($repo);
     $self->run_build($repo);
     $self->teardown_workspace($repo);
-    $self->log_output( $repo, $self->{build_output} );
+    $self->log_results( $repo, $self->{build_output} );
 }
 
 1;

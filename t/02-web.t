@@ -3,24 +3,15 @@ use strict;
 use Test::More;
 use Plack::Test;
 use HTTP::Request::Common;
-use Config::Tiny;
 use Sigma6;
-use File::Temp qw(tempdir);
+use Sigma6::Config::GitLike;
 use Data::Dumper;
 
-my $temp = tempdir( CLEANUP => 1 ) . '/sigma6';
+my $c = Sigma6::Config::GitLike->new();
 
-my $c = {
-    'server' => { 'smoker_command' => qq[bin/smoker.pl --target 'git\@github.com:perigrin/Exportare.git' --temp-dir $temp --build-command 'prove -I perl5/lib/perl5 -lwrv t/' --deps-command 'cpanm -L perl5 --installdeps Makefile.PL'], },
-    'build'  => {
-        'target'        => 'git@github.com:perigrin/Exportare.git',
-        'temp_dir'      => $temp,
-        'build_command' => 'prove -I perl5/lib/perl5 -lwrv t/',
-        'deps_command'  => 'cpanm -L perl5 --installdeps Makefile.PL',
-    },
-};
+$c->load('t/etc/');
 
-my $app = sub { Sigma6->new($c)->run_psgi(@_) };
+my $app = sub { Sigma6->new( config => $c )->run_psgi(@_) };
 
 test_psgi $app, sub {
     my $cb = shift;

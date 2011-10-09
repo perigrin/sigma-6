@@ -1,18 +1,17 @@
 package Sigma6;
-use strict;
-use warnings;
+use Moose;
 
 # ABSTRACT: CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra
 
-use Carp qw(confess);
-use Template::Tiny;
-use Git::Repository;
+use Sigma6::Config;
+use Template;
 
-sub new {
-    my $class = shift;
-    my %p = ref $_[0] ? %{ $_[0] } : @_;
-    return bless \%p, $class;
-}
+has config => (
+    does     => 'Sigma6::Config',
+    is       => 'ro',
+    required => 1,
+    handles  => 'Sigma6::Config',
+);
 
 sub run_psgi {
     my ( $self, $env ) = @_;
@@ -52,7 +51,7 @@ sub POST {
         return $self->HTTP_302('/');
     }
     elsif ( defined $pid ) {    # kick off the build server
-        exec( $self->{server}{smoker_command} );
+        exec( $self->smoker_command );
         exit;
     }
     else {                      # something funky happened
@@ -62,30 +61,26 @@ sub POST {
 
 sub GET {
     my $self = shift;
-    $self->_check_build;
-    Template::Tiny->new->process(
+    my $repo = $self->_check_build;
+    Template->new->process(
         $self->_template,
-        { o => {%$self}, },
+        {   o => $self,
+            r => $repo
+        },
         \( my $output )
     );
     return [ 200, [ "Content-Type", "text/html" ], [$output], ];
 }
 
 sub _check_build {
-    my $self = shift;
-    unless ( -e $self->{build}{temp_dir} ) {
-
-        $self->{repo}{head_sha1} = '[unknown]';
-        $self->{status} = 'Repository work tree missing. Kick off a build.';
-        return;
+    my $self      = shift;
+    my $work_tree = $self->temp_dir;
+    my @plugins   = $self->plugins_with('-CheckBuild');
+    my %repo      = ();
+    for my $plugin (@plugins) {
+        %repo = ( %{ $plugin->check_build($work_tree) }, %repo );
     }
-    my $repo = Git::Repository->new( work_tree => $self->{build}{temp_dir} );
-    $self->{status} = $repo->run( 'notes', 'show', 'HEAD' );
-    $self->{repo}{head_sha1} = substr $repo->run( 'rev-parse' => 'HEAD' ), 0,
-        6;
-    $self->{repo}{description} = $repo->run( 'log', '--oneline', '-1' );
-    $self->{status} ||= 'No smoke results.';
-    return;
+    return \%repo;
 }
 
 sub _template {
@@ -93,16 +88,16 @@ sub _template {
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Sigma6: [% o.build.target %]</title>
+        <title>Sigma6: [% o.build_target ) %]</title>
     </head>
     <body>
-        <h1>Build [% o.repo.head_sha1 %]</h1>
-	<p><i>[% o.repo.description %]</i></p>
-        <p>Building: <a href="[% o.build.target %]">[% o.build.target %]</a></p>
+        <h1>Build [% r.head_sha1 %]</h1>
+	<p><i>[% r.description %]</i></p>
+        <p>Building: <a href="[% o.build.target %]">[% o.build_target %]</a></p>
         <p>Dep Command: [% o.build.deps_command %]</p>
         <p>Build Command:  [% o.build.build_command %]</p>
         <form action="/" method="POST"><input type="submit" value="Build"/></form>
-        <div><pre><code>[% o.status %]</code></pre></div>
+        <div><pre><code>[% o.repo.status %]</code></pre></div>
     </body>
 </html>
 ]

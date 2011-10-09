@@ -6,7 +6,7 @@ use lib qw(perl5/lib/perl5);
 
 use Getopt::Long 2.33 qw(:config gnu_getopt);
 use Pod::Usage;
-use Config::Tiny;
+
 use Sigma6::Smoker;
 
 my $conf = {};
@@ -22,11 +22,6 @@ GetOptions(
 
 for ( keys %$conf ) {
     delete $conf->{$_} unless $conf->{$_};   # clear out the fake false values
-}
-
-if ( $conf->{file} ) {
-    $conf
-        = { %{ Config::Tiny->new->read( $conf->{file} )->{build} }, %$conf };
 }
 
 Sigma6::Smoker->new($conf)->run();
