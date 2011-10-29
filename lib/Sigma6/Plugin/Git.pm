@@ -6,8 +6,13 @@ use Git::Repository;
 extends qw(Sigma6::Plugin);
 
 with qw(
-    Sigma6::Plugin::API::CheckBuild
+    Sigma6::Plugin::API::BuildTarget
 );
+
+sub build_target {
+    my $self = shift;
+    return $self->get_config( key => 'git.target' );
+}
 
 sub check_build {
     my ( $self, $work_tree ) = @_;

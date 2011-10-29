@@ -4,7 +4,7 @@ use Moose;
 # ABSTRACT: CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra
 
 use Sigma6::Config;
-use Template;
+use Template::Tiny;
 
 has config => (
     does     => 'Sigma6::Config',
@@ -62,7 +62,7 @@ sub POST {
 sub GET {
     my $self = shift;
     my $repo = $self->_check_build;
-    Template->new->process(
+    Template::Tiny->new->process(
         $self->_template,
         {   o => $self,
             r => $repo
@@ -75,12 +75,8 @@ sub GET {
 sub _check_build {
     my $self      = shift;
     my $work_tree = $self->temp_dir;
-    my @plugins   = $self->plugins_with('-CheckBuild');
-    my %repo      = ();
-    for my $plugin (@plugins) {
-        %repo = ( %{ $plugin->check_build($work_tree) }, %repo );
-    }
-    return \%repo;
+    my @plugins   = $self->plugins_with('-BuildTarget');
+    return { map { %{ $_->check_build($work_tree) } } @plugins };
 }
 
 sub _template {
@@ -88,7 +84,7 @@ sub _template {
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Sigma6: [% o.build_target ) %]</title>
+        <title>Sigma6: [% o.build_target %]</title>
     </head>
     <body>
         <h1>Build [% r.head_sha1 %]</h1>
@@ -97,7 +93,7 @@ sub _template {
         <p>Dep Command: [% o.build.deps_command %]</p>
         <p>Build Command:  [% o.build.build_command %]</p>
         <form action="/" method="POST"><input type="submit" value="Build"/></form>
-        <div><pre><code>[% o.repo.status %]</code></pre></div>
+        <div><pre><code>[% r.status %]</code></pre></div>
     </body>
 </html>
 ]
@@ -113,15 +109,12 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 =head1 SYNOPSIS
 
     > cat sigma6.ini
-    [server]
-    smoker_command = /Users/perigrin/dev/perigrin/sigma-6/bin/smoke.pl
-    smoker_config = sigma6.ini
+    [Git]
+    target        = git@github.com:perigrin/Sigma6.git
 
-    [build]
-    target        = git@github.com:perigrin/sigma-6.git
-    dir           = /tmp/sigma6
-    deps_command  = dzil listdeps | cpanm -L perl5 
-    build_command = dzil smoke --automated
+    [Dzil]
+    deps_command  = dzil listdeps | cpanm -L perl5
+    build_command = 'PERL5LIB="perl5/lib/perl5:$PERL5LIB" dzil smoke'
         
     > plackup app.psgi
 
@@ -130,6 +123,5 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 Sigma6 is a Continuous Integration application originally based upon
 CIJoe. It should be self-hosting now but that hasn't really been pushed.
 Additionally the tests are woefully lacking, and you're reading all of the
-documentation there is. That said, it's under 200 lines of code, you should
+documentation there is. That said, it's 315 lines of code, you could
 just read that.
-
