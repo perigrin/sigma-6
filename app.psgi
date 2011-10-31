@@ -1,4 +1,8 @@
 #!/usr/bin/env perl
+use strict;
+use warnings;
+
+use lib qw(lib);
 use Sigma6;
 use Sigma6::Config::GitLike;
 

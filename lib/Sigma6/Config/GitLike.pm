@@ -29,5 +29,8 @@ around 'define' => sub {
     $self->$next(%args);
 };
 
+sub get_config { shift->get(@_) }
+
+__PACKAGE__->meta->make_immutable;
 1;
 __END__

@@ -5,8 +5,9 @@ has config => (
     isa      => 'Sigma6::Config',
     is       => 'ro',
     required => 1,
-    handles  => { get_config => 'get' },
+    handles  => 'Sigma6::Config',
 );
 
+__PACKAGE__->meta->make_immutable;
 1;
 __END__

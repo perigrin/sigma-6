@@ -5,8 +5,12 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 =head1 SYNOPSIS
 
     > cat sigma6.ini
+    [System]
+    temp_dir       = /tmp/sigma6
+    smoker_command = bin/smoker.pl;
+
     [Git]
-    target        = git@github.com:perigrin/Sigma6.git
+    target        = git@github.com:perigrin/sigma-6.git
 
     [Dzil]
     deps_command  = dzil listdeps | cpanm -L perl5

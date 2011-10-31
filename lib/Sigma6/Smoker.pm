@@ -1,59 +1,66 @@
 package Sigma6::Smoker;
-use strict;
+use Moose;
 
-use Git::Repository;
-use Cwd qw(chdir getcwd);
 use Capture::Tiny qw(capture_merged);
 
-sub new {
-    my $class = shift;
-    my %p = ref $_[0] ? %{ $_[0] } : @_;
-    return bless \%p, $class;
-}
+has config => (
+    does     => 'Sigma6::Config',
+    is       => 'ro',
+    required => 1,
+    handles  => 'Sigma6::Config',
+);
 
-sub initalize_repository {
+has build_output => (
+    isa     => 'Str',
+    is      => 'ro',
+    traits  => ['String'],
+    handles => { append_build_output => 'append' },
+    default => '',
+);
+
+sub setup_repository {
     my ($self) = @_;
-    unless ( -e $self->{temp_dir} ) {
-        Git::Repository->run( clone => $self->{target} => $self->{temp_dir} );
-    }
-    return Git::Repository->new( work_tree => $self->{temp_dir} );
+    $_->setup_repository for $self->plugins_with('-SetupRepository');
 }
 
 sub setup_workspace {
-    my ( $self, $repo ) = @_;
-    $repo->run('pull');
-    $self->{previous_workspace} = getcwd;
-    chdir $self->{temp_dir};
+    my ($self) = @_;
+    $_->setup_workspace for $self->plugins_with('-SetupWorkspace');
 }
 
 sub run_build {
     my ($self) = @_;
-    $self->{build_output} = capture_merged sub {
-        system $self->{deps_command};
-        system 'PERL5LIB=$PERL5LIB:perl5/lib/perl5 ' . $self->{build_command};
-    };
+    for my $plugin ( $self->plugins_with('-RunBuild') ) {
+        $self->append_build_output(
+            capture_merged sub {
+                system $plugin->deps_command;
+                system $plugin->build_command;
+            }
+        );
+    }
 }
 
 sub teardown_workspace {
     my ($self) = @_;
-    chdir $self->{previous_workspace};
+    $_->teardown_workspace for $self->plugins_with('-TeardownWorkspace');
 }
 
 sub log_results {
-    my ( $self, $repo, $output ) = @_;
-    $repo->run( 'notes', 'add', '-fm', $output, 'HEAD' );
+    my ( $self, ) = @_;
+    $_->log_results( $self->build_output )
+        for $self->plugins_with('-LogOutput');
 }
 
 sub run {
     my $self = shift;
-
-    my $repo = $self->initalize_repository;
-    $self->setup_workspace($repo);
-    $self->run_build($repo);
-    $self->teardown_workspace($repo);
-    $self->log_results( $repo, $self->{build_output} );
+    $self->setup_repository;
+    $self->initialize_workspace;
+    $self->run_build;
+    $self->teardown_workspace;
+    $self->log_results;
 }
 
+__PACKAGE__->meta->make_immutable;
 1;
 __END__
 

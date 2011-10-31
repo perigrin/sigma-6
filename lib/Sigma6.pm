@@ -29,7 +29,7 @@ sub HTTP_501 {
         [ "Content-Type", "text/plain" ],
         ["Sorry that method is not implemented for this resource"],
     ];
-
+ 
 }
 
 sub HTTP_404 {
@@ -50,7 +50,7 @@ sub POST {
     if ( my $pid = fork ) {    # return a 302 to GET /
         return $self->HTTP_302('/');
     }
-    elsif ( defined $pid ) {    # kick off the build server
+    elsif ( defined $pid ) {    # kick off the build server        
         exec( $self->smoker_command );
         exit;
     }
@@ -73,10 +73,12 @@ sub GET {
 }
 
 sub _check_build {
-    my $self      = shift;
-    my $work_tree = $self->temp_dir;
-    my @plugins   = $self->plugins_with('-BuildTarget');
-    return { map { %{ $_->check_build($work_tree) } } @plugins };
+    my $self = shift;
+    my $ret = {
+        map { %{ $_->check_build } } $self->plugins_with('-BuildTarget')
+    };
+    warn Data::Dumper::Dumper $ret;
+    return $ret;
 }
 
 sub _template {
@@ -90,8 +92,6 @@ sub _template {
         <h1>Build [% r.head_sha1 %]</h1>
 	<p><i>[% r.description %]</i></p>
         <p>Building: <a href="[% o.build.target %]">[% o.build_target %]</a></p>
-        <p>Dep Command: [% o.build.deps_command %]</p>
-        <p>Build Command:  [% o.build.build_command %]</p>
         <form action="/" method="POST"><input type="submit" value="Build"/></form>
         <div><pre><code>[% r.status %]</code></pre></div>
     </body>
@@ -109,8 +109,12 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 =head1 SYNOPSIS
 
     > cat sigma6.ini
+    [System]
+    temp_dir       = /tmp/sigma6
+    smoker_command = bin/smoker.pl;
+
     [Git]
-    target        = git@github.com:perigrin/Sigma6.git
+    target        = git@github.com:perigrin/sigma-6.git
 
     [Dzil]
     deps_command  = dzil listdeps | cpanm -L perl5

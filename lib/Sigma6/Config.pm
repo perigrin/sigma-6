@@ -2,14 +2,12 @@ package Sigma6::Config;
 use Moose::Role;
 use namespace::autoclean;
 
-use File::Temp qw(tempdir);
+requires qw(get_config);
 
 has plugins => (
-    isa    => 'ArrayRef',
-    is     => 'ro',
-    traits => ['Array'],
-
-    #    lazy    => 1,
+    isa     => 'ArrayRef',
+    is      => 'ro',
+    traits  => ['Array'],
     builder => '_build_plugins',
     handles => {
         'find_plugin' => 'grep',
@@ -41,10 +39,6 @@ sub plugins_with {
     return @output;
 }
 
-sub temp_dir {
-    tempdir( CLEANUP => 1 ) . '/sigma6';
-}
-
 sub build_target {
     my $self    = shift;
     my @plugins = $self->plugins_with('-BuildTarget');
@@ -52,8 +46,18 @@ sub build_target {
     return $build_target;
 }
 
+sub temp_dir {
+    my $self    = shift;
+    my @plugins = $self->plugins_with('-TempDir');
+    my ($temp_dir) = map { $_->temp_dir } @plugins;
+    return $temp_dir;
+}
+
 sub smoker_command {
-    'bin/smoker.pl --config sigma6.ini';
+    my $self    = shift;
+    my @plugins = $self->plugins_with('-SmokerCommand');
+    my ($smoker_command) = map { $_->smoker_command } @plugins;
+    return $smoker_command;
 }
 
 1;

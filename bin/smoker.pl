@@ -1,30 +1,15 @@
 #!/usr/bin/env perl
-package Sigma6::Smoker::script;
 use strict;
+use warnings;
 use lib qw(lib);
-use lib qw(perl5/lib/perl5);
-
-use Getopt::Long 2.33 qw(:config gnu_getopt);
-use Pod::Usage;
 
 use Sigma6::Smoker;
+use Sigma6::Config::GitLike;
 
-my $conf = {};
+my $c = Sigma6::Config::GitLike->new();
+$c->load( $ENV{PWD} );
 
-GetOptions(
-    'config=s'              => \$conf->{file},
-    'target=s'              => \$conf->{target},
-    'temp-dir=s'            => \$conf->{temp_dir},
-    'deps-command|deps=s'   => \$conf->{deps_command},
-    'build-command|build=s' => \$conf->{build_command},
-    man                     => sub { pod2usage( -verbose => 2 ) },
-);
-
-for ( keys %$conf ) {
-    delete $conf->{$_} unless $conf->{$_};   # clear out the fake false values
-}
-
-Sigma6::Smoker->new($conf)->run();
+Sigma6::Smoker->new( config => $c )->run();
 
 __END__
 
