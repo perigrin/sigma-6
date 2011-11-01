@@ -1,21 +1,14 @@
 package Sigma6::Smoker;
 use Moose;
+use namespace::autoclean;
 
-use Capture::Tiny qw(capture_merged);
+# ABSTRACT: The Default Smoker for Sigma6
 
 has config => (
     does     => 'Sigma6::Config',
     is       => 'ro',
     required => 1,
     handles  => 'Sigma6::Config',
-);
-
-has build_output => (
-    isa     => 'Str',
-    is      => 'ro',
-    traits  => ['String'],
-    handles => { append_build_output => 'append' },
-    default => '',
 );
 
 sub setup_repository {
@@ -30,14 +23,7 @@ sub setup_workspace {
 
 sub run_build {
     my ($self) = @_;
-    for my $plugin ( $self->plugins_with('-RunBuild') ) {
-        $self->append_build_output(
-            capture_merged sub {
-                system $plugin->deps_command;
-                system $plugin->build_command;
-            }
-        );
-    }
+    $_->run_build for $self->plugins_with('-RunBuild');
 }
 
 sub teardown_workspace {
@@ -45,19 +31,22 @@ sub teardown_workspace {
     $_->teardown_workspace for $self->plugins_with('-TeardownWorkspace');
 }
 
-sub log_results {
-    my ( $self, ) = @_;
-    $_->log_results( $self->build_output )
-        for $self->plugins_with('-LogOutput');
+sub record_results {
+    my ($self) = @_;
+    for my $build ( $self->plugins_with('-BuildStatus') ) {
+        for my $logger ( $self->plugins_with('-RecordResults') ) {
+            $logger->record_results($build);
+        }
+    }
 }
 
 sub run {
     my $self = shift;
     $self->setup_repository;
-    $self->initialize_workspace;
+    $self->setup_workspace;
     $self->run_build;
+    $self->record_results;
     $self->teardown_workspace;
-    $self->log_results;
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -65,18 +54,20 @@ __PACKAGE__->meta->make_immutable;
 __END__
 
 
-=head1 NAME Sigma6::Smoke
+=head1 NAME Sigma6::Smoker
 
 =head1 SYNOPSIS
 
-    my $smoker = Sigma6::Smoke->new(
-        target        => 'git@github.com:perigrin/sigma-6.git',
-        temp_dir      => '/tmp/sigma6',
-        deps_command  => 'dzil listdeps | cpanm -L perl5',
-        build_command => 'dzil smoke --automated',
-    );
-    $smoker->run();
+    #!/usr/bin/env perl
+    use strict;
+    use warnings;
+    use lib qw(lib);
 
-=head1 DESCRIPTION
+    use Sigma6::Smoker;
+    use Sigma6::Config::GitLike;
 
-The default smoker for Sigma6. 
+    my $c = Sigma6::Config::GitLike->new();
+    $c->load( $ENV{PWD} );
+
+    Sigma6::Smoker->new( config => $c )->run();
+

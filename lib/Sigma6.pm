@@ -29,7 +29,7 @@ sub HTTP_501 {
         [ "Content-Type", "text/plain" ],
         ["Sorry that method is not implemented for this resource"],
     ];
- 
+
 }
 
 sub HTTP_404 {
@@ -47,16 +47,8 @@ sub HTTP_302 {
 
 sub POST {
     my $self = shift;
-    if ( my $pid = fork ) {    # return a 302 to GET /
-        return $self->HTTP_302('/');
-    }
-    elsif ( defined $pid ) {    # kick off the build server        
-        exec( $self->smoker_command );
-        exit;
-    }
-    else {                      # something funky happened
-        confess "Could not fork: $!";
-    }
+    $_->start_smoker for $self->plugins_with('-StartSmoker');
+    return $self->HTTP_302('/');
 }
 
 sub GET {
@@ -73,12 +65,27 @@ sub GET {
 }
 
 sub _check_build {
+    my $self  = shift;
+    my $build = {};
+
+    for my $plugin ( $self->plugins_with('-Repository') ) {
+        $build->{build_id}    ||= $plugin->build_id;
+        $build->{description} ||= $plugin->build_description;
+    }
+
+    $build->{status} = $self->first_from_plugin_with( '-BuildStatus',
+        sub { shift->build_status } );
+    return $build;
+}
+
+sub workspace {
     my $self = shift;
-    my $ret = {
-        map { %{ $_->check_build } } $self->plugins_with('-BuildTarget')
-    };
-    warn Data::Dumper::Dumper $ret;
-    return $ret;
+    $self->first_from_plugin_with( '-Workspace', sub { shift->workspace } );
+}
+
+sub target {
+    my $self = shift;
+    $self->first_from_plugin_with( '-Repository', sub { shift->target } );
 }
 
 sub _template {
@@ -86,10 +93,10 @@ sub _template {
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Sigma6: [% o.build_target %]</title>
+        <title>Sigma6: [% o.target %]</title>
     </head>
     <body>
-        <h1>Build [% r.head_sha1 %]</h1>
+        <h1>Build [% r.build_id %]</h1>
 	<p><i>[% r.description %]</i></p>
         <p>Building: <a href="[% o.build.target %]">[% o.build_target %]</a></p>
         <form action="/" method="POST"><input type="submit" value="Build"/></form>
@@ -127,5 +134,7 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 Sigma6 is a Continuous Integration application originally based upon
 CIJoe. It should be self-hosting now but that hasn't really been pushed.
 Additionally the tests are woefully lacking, and you're reading all of the
-documentation there is. That said, it's 315 lines of code, you could
+documentation there is. That said, it's 429 lines of code, you could
 just read that.
+
+

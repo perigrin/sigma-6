@@ -21,12 +21,9 @@ test_psgi $app, sub {
         my $content = $res->content;
 
         like $content,
-            qr|<title>Sigma6: git\@github.com:perigrin/Exportare.git</title>|,
+            qr|\Q<title>\ESigma6: git\@github.com:perigrin/Exportare.git\Q</title>\E|oi,
             'title looks good';
-        like $content, qr|\Q<h1>Build [unknown]</h1>\E|, 'h1 looks good';
-        like $content,
-            qr|\Q<div><pre><code>Repository work tree missing. Kick off a build.</code></pre></div>\E|,
-            'content looks good';
+        like $content, qr|\Q<h1>\EBuild [0-9a-f]{7}\Q</h1>\E|oi, 'h1 looks good';
     }
 
     {

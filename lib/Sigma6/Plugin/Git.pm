@@ -2,56 +2,86 @@ package Sigma6::Plugin::Git;
 use Moose;
 use namespace::autoclean;
 
+# ABSTRACT: Sigma6 Git Plugin
+
 use Git::Repository;
 
 extends qw(Sigma6::Plugin);
 
-with qw(
-    Sigma6::Plugin::API::BuildTarget
-    Sigma6::Plugin::API::SetupRepository
-);
-
-has repo => (
+has repository => (
     isa     => 'Git::Repository',
     is      => 'ro',
     lazy    => 1,
-    builder => "_build_repo",
+    clearer => '_clear_repository',
+    builder => "_build_repository",
     handles => { git_run => 'run', }
 );
 
-sub _build_repo {
+sub _build_repository {
     my $self = shift;
-    unless ( -e $self->temp_dir ) {
-        Git::Repository->run(
-            clone => $self->build_target => $self->temp_dir );
+    unless ( -e $self->workspace ) {
+        Git::Repository->run( clone => $self->target => $self->workspace );
     }
-    return Git::Repository->new( work_tree => $self->temp_dir );
+    Git::Repository->new( work_tree => $self->workspace );
 }
 
-sub build_target {
+with qw(
+    Sigma6::Plugin::API::SetupRepository
+    Sigma6::Plugin::API::Repository
+    Sigma6::Plugin::API::TeardownRepository
+    Sigma6::Plugin::API::BuildStatus
+    Sigma6::Plugin::API::RecordResults
+);
+
+has workspace => (
+    isa     => 'Str',
+    is      => 'ro',
+    lazy    => 1,
+    clearer => '_clear_workspace',
+    builder => '_build_workspace',
+);
+
+sub _build_workspace {
     my $self = shift;
-    return $self->get_config( key => 'git.target' );
+    $self->first_from_plugin_with( '-Workspace', sub { shift->workspace } );
 }
 
-sub check_build {
-    my ($self) = @_;
-    $self->setup_repository;
+sub target {
+    $_[0]->get_config( key => 'git.target' );
+}
 
-    return +{
-        head_sha1 => substr( $self->git_run( 'rev-parse' => 'HEAD' ), 0, 7 ),
-        status => $self->git_run( 'notes', 'show', 'HEAD' ) || '',
-        description => $self->git_run( 'log', '--oneline', '-1' ),
-    };
+sub build_id {
+    my $self = shift;
+    my $sha1 = Git::Repository->run( 'ls-remote', $self->target, 'HEAD' );
+    return substr( $sha1, 0, 7 );
+}
+
+sub build_status {
+    $_[0]->git_run( 'notes', 'show', 'HEAD' ) || '';
+}
+
+sub build_description {
+    $_[0]->git_run( 'log', '--oneline', '-1' );
 }
 
 sub setup_repository {
-    my ($self) = @_;
-    $self->git_run('pull');
+    $_[0]->git_run('pull');
+    $_[0]->git_run( 'fetch', 'origin', 'refs/notes/*:refs/notes/*' );
 }
 
-sub log_results {
-    my ( $self, $results ) = @_;
-    $self->git_run( 'notes', 'add', '-fm', $results, 'HEAD' );
+sub teardown_repository {
+    my $self = shift;
+    $self->git_run( 'push', 'origin', 'refs/notes/*' );
+    $self->git_run( 'clean', '-dxf' );
+    $self->_clear_workspace;
+    $self->_clear_repository;
+}
+
+sub record_results {
+    my ( $self, $plugin ) = @_;
+    return if $plugin == $self;
+    $self->git_run( 'notes', '--ref=sigma6', 'add', '-fm',
+        $plugin->build_status, 'HEAD' );
 }
 
 __PACKAGE__->meta->make_immutable;

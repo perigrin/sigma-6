@@ -2,11 +2,9 @@ package Sigma6::Plugin::API::TeardownWorkspace;
 use Moose::Role;
 use namespace::autoclean;
 
-requires qw(previous_workspace);
+# ABSTRACT: TeardownWorkspace Plugin API
 
-sub teardown_workspace {
-    chdir $_[0]->previous_workspace;
-}
+requires qw(teardown_workspace);
 
 1;
 __END__

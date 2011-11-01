@@ -1,5 +1,8 @@
 package Sigma6::Plugin;
 use Moose;
+use namespace::autoclean;
+
+# ABSTRACT: The base class for Sigma6 Plugins
 
 has config => (
     isa      => 'Sigma6::Config',
@@ -11,3 +14,7 @@ has config => (
 __PACKAGE__->meta->make_immutable;
 1;
 __END__
+
+
+=head1 NAME Sigma6::Plugin
+

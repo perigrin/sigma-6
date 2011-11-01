@@ -2,6 +2,8 @@ package Sigma6::Config;
 use Moose::Role;
 use namespace::autoclean;
 
+# ABSTRACT: The Sigma6 Plugin Configuration System
+
 requires qw(get_config);
 
 has plugins => (
@@ -39,26 +41,16 @@ sub plugins_with {
     return @output;
 }
 
-sub build_target {
-    my $self    = shift;
-    my @plugins = $self->plugins_with('-BuildTarget');
-    my ($build_target) = map { $_->build_target } @plugins;
-    return $build_target;
-}
-
-sub temp_dir {
-    my $self    = shift;
-    my @plugins = $self->plugins_with('-TempDir');
-    my ($temp_dir) = map { $_->temp_dir } @plugins;
-    return $temp_dir;
-}
-
-sub smoker_command {
-    my $self    = shift;
-    my @plugins = $self->plugins_with('-SmokerCommand');
-    my ($smoker_command) = map { $_->smoker_command } @plugins;
-    return $smoker_command;
+sub first_from_plugin_with {
+    my ( $self, $role, $test ) = @_;
+    my @plugins = $self->plugins_with($role);
+    for my $plugin (@plugins) {
+        my $value = $plugin->$test;
+        next unless $value;
+        return $value;
+    }
 }
 
 1;
 __END__
+

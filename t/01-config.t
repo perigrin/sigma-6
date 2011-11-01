@@ -25,12 +25,8 @@ diag join ',', @{ $c->config_files };
 ok( $c->plugins, 'got plugns' );
 
 for my $o ( @{ $c->plugins } ) {
-    ok( $o->isa('Sigma6::Plugin') );
+    ok( $o->isa('Sigma6::Plugin'), "$o isa Sigma6::Plugin" );
 }
-
-ok( $c->build_target,   'got a build target' );
-ok( $c->smoker_command, 'got a smoker_command' );
-ok( $c->temp_dir,       'got a temp directory' );
 
 done_testing;
 __END__

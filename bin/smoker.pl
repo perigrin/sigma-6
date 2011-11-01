@@ -5,9 +5,14 @@ use lib qw(lib);
 
 use Sigma6::Smoker;
 use Sigma6::Config::GitLike;
+use Getopt::Long;
+
+my $config = $ENV{PWD};
+
+GetOptions( "config=s" => \$config );
 
 my $c = Sigma6::Config::GitLike->new();
-$c->load( $ENV{PWD} );
+$c->load($config);
 
 Sigma6::Smoker->new( config => $c )->run();
 
