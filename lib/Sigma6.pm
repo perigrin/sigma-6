@@ -137,4 +137,8 @@ Additionally the tests are woefully lacking, and you're reading all of the
 documentation there is. That said, it's 531 lines of code, you could
 just read that.
 
+=head1 THANKS
+
+Portions of Sigam6's development (like the entire Plugin System) were
+funded by SocialFlow. Special thanks go out to them.
 
