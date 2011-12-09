@@ -23,7 +23,8 @@ test_psgi $app, sub {
         like $content,
             qr|\Q<title>\ESigma6: git\@github.com:perigrin/Exportare.git\Q</title>\E|oi,
             'title looks good';
-        like $content, qr|\Q<h2>\EBuild [0-9a-f]{7}\Q</h2>\E|oi, 'h1 looks good';
+        like $content, qr|\Q<h1>perigrin/Exportare.git</h1>\E|oi, 'h1 looks good';
+        like $content, qr|\Q<h2>\EBuild [0-9a-f]{7}\Q</h2>\E|oi, 'h2 looks good';
     }
 
     {

@@ -70,6 +70,10 @@ sub _build_note_command {
         // 'notes --ref=sigma6 add -fm';
 }
 
+sub target_name {
+    return ( split /:/, shift->target )[-1];
+}
+
 sub build_id {
     my $self = shift;
     my $sha1 = Git::Repository->run( 'ls-remote', $self->target, 'HEAD' );

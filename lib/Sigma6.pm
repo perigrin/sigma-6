@@ -89,6 +89,12 @@ sub target {
     $self->first_from_plugin_with( '-Repository', sub { shift->target } );
 }
 
+sub target_name {
+    my $self = shift;
+    $self->first_from_plugin_with( '-Repository', sub { shift->target_name } );
+}
+
+
 sub _template {
     return \qq[
 <!DOCTYPE html>
@@ -97,7 +103,7 @@ sub _template {
         <title>Sigma6: [% o.target %]</title>
     </head>
     <body>
-        <h1>[% o.target %]</h1>
+        <h1>[% o.target_name %]</h1>
         <h2>Build [% r.build_id %]</h2>
 	<p><i>[% r.description %]</i></p>
         <p>Building: <a href="[% o.build.target %]">[% o.build_target %]</a></p>

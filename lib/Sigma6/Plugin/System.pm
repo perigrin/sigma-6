@@ -53,7 +53,7 @@ sub workspace {
     my $self = shift;
     my $dir = $self->get_config( key => 'system.workspace' );
     mkdir $dir unless -e $dir;
-    my $id = $self->build_id;
+    my $id = $self->target_name;
     return "$dir/$id";
 }
 
@@ -64,9 +64,9 @@ sub setup_workspace {
     $ENV{PERL5LIB} .= ':perl5/lib/perl5';
 }
 
-sub build_id {
+sub target_name {
     my $self = shift;
-    $self->first_from_plugin_with( '-Repository', sub { shift->build_id } );
+    $self->first_from_plugin_with( '-Repository', sub { shift->target_name } );
 }
 
 sub smoker_command {
