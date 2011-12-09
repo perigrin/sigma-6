@@ -1,4 +1,5 @@
 package Sigma6;
+use v5.10;
 use Moose;
 
 # ABSTRACT: CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra
