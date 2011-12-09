@@ -25,6 +25,17 @@ sub _build_repository {
     Git::Repository->new( work_tree => $self->workspace );
 }
 
+has target => (
+    isa     => 'Str',
+    is      => 'ro',
+    builder => '_build_target',
+    lazy    => 1,
+);
+
+sub _build_target {
+    $_[0]->get_config( key => 'git.target' );
+}
+
 with qw(
     Sigma6::Plugin::API::SetupRepository
     Sigma6::Plugin::API::Repository
@@ -46,8 +57,17 @@ sub _build_workspace {
     $self->first_from_plugin_with( '-Workspace', sub { shift->workspace } );
 }
 
-sub target {
-    $_[0]->get_config( key => 'git.target' );
+has note_command => (
+    isa     => 'Str',
+    is      => 'ro',
+    builder => '_build_note_command',
+    lazy    => 1,
+);
+
+sub _build_note_command {
+    my $self = shift;
+    $self->get_config( key => 'git.note_command' )
+        // 'notes --ref=sigma6 add -fm';
 }
 
 sub build_id {
@@ -80,8 +100,7 @@ sub teardown_repository {
 sub record_results {
     my ( $self, $plugin ) = @_;
     return if $plugin == $self;
-    $self->git_run( 'notes', '--ref=sigma6', 'add', '-fm',
-        $plugin->build_status, 'HEAD' );
+    $self->git_run( $self->note_command, $plugin->build_status, 'HEAD' );
 }
 
 __PACKAGE__->meta->make_immutable;

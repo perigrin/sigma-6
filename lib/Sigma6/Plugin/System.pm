@@ -57,6 +57,13 @@ sub workspace {
     return "$dir/$id";
 }
 
+sub setup_workspace {
+    my $self = shift;
+    mkdir $self->workspace unless -e $self->workspace;
+    chdir $self->workspace;
+    $ENV{PERL5LIB} .= ':perl5/lib/perl5';
+}
+
 sub build_id {
     my $self = shift;
     $self->first_from_plugin_with( '-Repository', sub { shift->build_id } );
@@ -87,20 +94,14 @@ sub start_smoker {
     }
 }
 
-sub setup_workspace {
-    my $self = shift;
-    mkdir $self->workspace unless -e $self->workspace;
-    chdir $self->workspace;
-    $ENV{PERL5LIB} .= ':perl5/lib/perl5';
-}
-
 sub run_build {
-    my $self = shift;
+    my $self       = shift;
+    my $deps_file  = $self->deps_file;
+    my $build_file = $self->build_file;
+    
     for my $builder ( $self->plugins_with('-BuildSystem') ) {
         my $deps_command  = $builder->deps_command;
         my $build_command = $builder->build_command;
-        my $deps_file     = $self->deps_file;
-        my $build_file    = $self->build_file;
         system 'mkdir .sigma6' unless -e '.sigma6';
         system "$deps_command &> $deps_file";
         system "$build_command &> $build_file";
