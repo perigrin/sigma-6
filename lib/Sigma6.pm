@@ -97,7 +97,8 @@ sub _template {
         <title>Sigma6: [% o.target %]</title>
     </head>
     <body>
-        <h1>Build [% r.build_id %]</h1>
+        <h1>[% o.target %]</h1>
+        <h2>Build [% r.build_id %]</h2>
 	<p><i>[% r.description %]</i></p>
         <p>Building: <a href="[% o.build.target %]">[% o.build_target %]</a></p>
         <form action="/" method="POST"><input type="submit" value="Build"/></form>
