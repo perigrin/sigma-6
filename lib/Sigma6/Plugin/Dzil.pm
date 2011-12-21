@@ -8,11 +8,11 @@ extends qw(Sigma6::Plugin);
 with qw(Sigma6::Plugin::API::BuildSystem);
 
 sub deps_command {
-    $_[0]->get_config( key => 'dzil.deps_command' );
+    $_[0]->get_config( key => 'Dzil.deps_command' );
 }
 
 sub build_command {
-    $_[0]->get_config( key => 'dzil.build_command' );
+    $_[0]->get_config( key => 'Dzil.build_command' );
 }
 
 __PACKAGE__->meta->make_immutable;

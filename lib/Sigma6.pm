@@ -5,114 +5,24 @@ use Moose;
 # ABSTRACT: CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobra
 
 use Sigma6::Config;
-use Template::Tiny;
+use Sigma6::Web;
+use Sigma6::Smoker;
 
 has config => (
     does     => 'Sigma6::Config',
     is       => 'ro',
     required => 1,
-    handles  => 'Sigma6::Config',
 );
 
-sub run_psgi {
-    my ( $self, $env ) = @_;
-    $env->{'sigma6.path'} = $env->{PATH_INFO} || '/';
-    return $self->HTTP_404 unless $env->{'sigma6.path'} eq '/';
-    if ( my $method = $self->can( $env->{REQUEST_METHOD} ) ) {
-        return $self->$method($env);
-    }
-    return $self->HTTP_501;
-}
+has web_app => (
+    isa     => 'Sigma6::Web',
+    is      => 'ro',
+    lazy    => 1,
+    builder => '_build_web_app',
+    handles => ['run_psgi'],
+);
 
-sub HTTP_501 {
-    return [
-        501,
-        [ "Content-Type", "text/plain" ],
-        ["Sorry that method is not implemented for this resource"],
-    ];
-
-}
-
-sub HTTP_404 {
-    return [
-        404,
-        [ "Content-Type", "text/plain" ],
-        ["Sorry that resource can not be found."],
-    ];
-}
-
-sub HTTP_302 {
-    my ( $self, $url ) = @_;
-    return [ 302, [ 'Location', $url ], [] ];
-}
-
-sub POST {
-    my $self = shift;
-    $_->start_smoker for $self->plugins_with('-StartSmoker');
-    return $self->HTTP_302('/');
-}
-
-sub GET {
-    my $self = shift;
-    my $repo = $self->_check_build;
-    Template::Tiny->new->process(
-        $self->_template,
-        {   o => $self,
-            r => $repo
-        },
-        \( my $output )
-    );
-    return [ 200, [ "Content-Type", "text/html" ], [$output], ];
-}
-
-sub _check_build {
-    my $self  = shift;
-    my $build = {};
-
-    for my $plugin ( $self->plugins_with('-Repository') ) {
-        $build->{build_id}    ||= $plugin->build_id;
-        $build->{description} ||= $plugin->build_description;
-    }
-
-    $build->{status} = $self->first_from_plugin_with( '-BuildStatus',
-        sub { shift->build_status } );
-    return $build;
-}
-
-sub workspace {
-    my $self = shift;
-    $self->first_from_plugin_with( '-Workspace', sub { shift->workspace } );
-}
-
-sub target {
-    my $self = shift;
-    $self->first_from_plugin_with( '-Repository', sub { shift->target } );
-}
-
-sub target_name {
-    my $self = shift;
-    $self->first_from_plugin_with( '-Repository', sub { shift->target_name } );
-}
-
-
-sub _template {
-    return \qq[
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Sigma6: [% o.target %]</title>
-    </head>
-    <body>
-        <h1>[% o.target_name %]</h1>
-        <h2>Build [% r.build_id %]</h2>
-	<p><i>[% r.description %]</i></p>
-        <p>Building: <a href="[% o.build.target %]">[% o.build_target %]</a></p>
-        <form action="/" method="POST"><input type="submit" value="Build"/></form>
-        <div><pre><code>[% r.status %]</code></pre></div>
-    </body>
-</html>
-]
-}
+sub _build_web_app { Sigma6::Web->new( config => shift->config ) }
 
 1;
 __END__

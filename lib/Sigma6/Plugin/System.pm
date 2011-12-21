@@ -15,14 +15,15 @@ has previous_workspace => (
 );
 
 with qw(
+    Sigma6::Plugin::API::BuildStatus
+    Sigma6::Plugin::API::CheckBuilds
+    Sigma6::Plugin::API::RunBuild
     Sigma6::Plugin::API::SetupSmoker
+    Sigma6::Plugin::API::SetupWorkspace
     Sigma6::Plugin::API::StartSmoker
     Sigma6::Plugin::API::TeardownSmoker
-    Sigma6::Plugin::API::RunBuild
-    Sigma6::Plugin::API::BuildStatus
-    Sigma6::Plugin::API::SetupWorkspace
-    Sigma6::Plugin::API::Workspace
     Sigma6::Plugin::API::TeardownWorkspace
+    Sigma6::Plugin::API::Workspace
 );
 
 has deps_file => (
@@ -51,7 +52,7 @@ sub _build_build_file {
 
 sub workspace {
     my $self = shift;
-    my $dir = $self->get_config( key => 'system.workspace' );
+    my $dir = $self->get_config( key => 'System.workspace' );
     mkdir $dir unless -e $dir;
     my $id = $self->target_name;
     return "$dir/$id";
@@ -66,11 +67,12 @@ sub setup_workspace {
 
 sub target_name {
     my $self = shift;
-    $self->first_from_plugin_with( '-Repository', sub { shift->target_name } );
+    $self->first_from_plugin_with( '-Repository',
+        sub { shift->target_name } );
 }
 
 sub smoker_command {
-    return $_[0]->get_config( key => 'system.smoker_command' );
+    return $_[0]->get_config( key => 'System.smoker_command' );
 }
 
 sub build_status {
@@ -98,7 +100,7 @@ sub run_build {
     my $self       = shift;
     my $deps_file  = $self->deps_file;
     my $build_file = $self->build_file;
-    
+
     for my $builder ( $self->plugins_with('-BuildSystem') ) {
         my $deps_command  = $builder->deps_command;
         my $build_command = $builder->build_command;
@@ -111,6 +113,13 @@ sub run_build {
 sub teardown_workspace {
     my $self = shift;
     chdir $self->previous_workspace;
+}
+
+sub check_builds {
+    my $self = shift;
+    my @builds = map { { status => $_->build_status } }
+        $self->plugins_with('-BuildStatus');
+    return @builds;
 }
 
 __PACKAGE__->meta->make_immutable;

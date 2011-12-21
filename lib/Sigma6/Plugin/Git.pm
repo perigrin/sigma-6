@@ -33,14 +33,13 @@ has target => (
 );
 
 sub _build_target {
-    $_[0]->get_config( key => 'git.target' );
+    $_[0]->get_config( key => 'Git.target' );
 }
 
 with qw(
     Sigma6::Plugin::API::SetupRepository
     Sigma6::Plugin::API::Repository
     Sigma6::Plugin::API::TeardownRepository
-    Sigma6::Plugin::API::BuildStatus
     Sigma6::Plugin::API::RecordResults
 );
 
@@ -66,7 +65,7 @@ has note_command => (
 
 sub _build_note_command {
     my $self = shift;
-    $self->get_config( key => 'git.note_command' )
+    $self->get_config( key => 'Git.note_command' )
         // 'notes --ref=sigma6 add -fm';
 }
 
