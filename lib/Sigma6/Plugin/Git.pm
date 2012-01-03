@@ -8,6 +8,17 @@ use Git::Repository;
 
 extends qw(Sigma6::Plugin);
 
+has target => (
+    isa     => 'Str',
+    is      => 'ro',
+    builder => '_build_target',
+    lazy    => 1,
+);
+
+sub _build_target {
+    $_[0]->get_config( key => 'Git.target' );
+}
+
 has repository => (
     isa     => 'Git::Repository',
     is      => 'ro',
@@ -23,17 +34,6 @@ sub _build_repository {
         Git::Repository->run( clone => $self->target => $self->workspace );
     }
     Git::Repository->new( work_tree => $self->workspace );
-}
-
-has target => (
-    isa     => 'Str',
-    is      => 'ro',
-    builder => '_build_target',
-    lazy    => 1,
-);
-
-sub _build_target {
-    $_[0]->get_config( key => 'Git.target' );
 }
 
 with qw(
@@ -73,19 +73,23 @@ sub target_name {
     return ( split /:/, shift->target )[-1];
 }
 
-sub build_id {
+sub commit_id {
     my $self = shift;
     my $sha1 = Git::Repository->run( 'ls-remote', $self->target, 'HEAD' );
     return substr( $sha1, 0, 7 );
 }
 
-sub build_status {
+sub commit_status {
     $_[0]->git_run( 'notes', 'show', 'HEAD' ) || '';
 }
 
-sub build_description {
+sub commit_description {
     $_[0]->git_run( 'log', '--oneline', '-1' );
 }
+
+sub build_id          { shift->commit_id }
+sub build_status      { shift->commit_status }
+sub build_description { shift->commit_description }
 
 sub setup_repository {
     $_[0]->git_run('pull');

@@ -1,4 +1,4 @@
-package Sigma6::Plugin::System;
+package Sigma6::Plugin::Smoker::Simple;
 use Moose;
 use namespace::autoclean;
 
@@ -15,13 +15,13 @@ has previous_workspace => (
 );
 
 with qw(
-    Sigma6::Plugin::API::BuildStatus
-    Sigma6::Plugin::API::CheckBuilds
-    Sigma6::Plugin::API::RunBuild
     Sigma6::Plugin::API::SetupSmoker
-    Sigma6::Plugin::API::SetupWorkspace
+    Sigma6::Plugin::API::CheckSmoker
     Sigma6::Plugin::API::StartSmoker
+    Sigma6::Plugin::API::RunSmoker
     Sigma6::Plugin::API::TeardownSmoker
+
+    Sigma6::Plugin::API::SetupWorkspace
     Sigma6::Plugin::API::TeardownWorkspace
     Sigma6::Plugin::API::Workspace
 );
@@ -52,7 +52,7 @@ sub _build_build_file {
 
 sub workspace {
     my $self = shift;
-    my $dir = $self->get_config( key => 'System.workspace' );
+    my $dir = $self->get_config( key =>'Smoker::Simple.workspace' );
     mkdir $dir unless -e $dir;
     my $id = $self->target_name;
     return "$dir/$id";
@@ -66,29 +66,31 @@ sub setup_workspace {
 }
 
 sub target_name {
-    my $self = shift;
-    $self->first_from_plugin_with( '-Repository',
-        sub { shift->target_name } );
+    shift->first_from_plugin_with( '-Repository' => sub { shift->target_name }
+    );
 }
 
-sub smoker_command {
-    return $_[0]->get_config( key => 'System.smoker_command' );
-}
-
-sub build_status {
+sub smoker_status {
     my $self       = shift;
     my $build_file = $self->build_file;
     return `cat $build_file` if -e $build_file;
     return '[nothing yet]';
 }
 
+
+sub smoker_command {
+    $_[0]->get_config( key =>  'Smoker::Simple.smoker_command' );
+}
+
 sub start_smoker {
     my $self = shift;
+    my $cmd  = $self->smoker_command;
+    confess 'No smoker_command' unless $cmd;
     if ( my $pid = fork ) {
         return $pid;
     }
     elsif ( defined $pid ) {
-        exec( $self->smoker_command );
+        exec($cmd);
         exit;
     }
     else {
@@ -96,12 +98,16 @@ sub start_smoker {
     }
 }
 
-sub run_build {
+sub setup_smoker {
+    
+}
+
+sub run_smoke {
     my $self       = shift;
     my $deps_file  = $self->deps_file;
     my $build_file = $self->build_file;
 
-    for my $builder ( $self->plugins_with('-BuildSystem') ) {
+    for my $builder ( $self->plugins_with('-SmokeCommands') ) {
         my $deps_command  = $builder->deps_command;
         my $build_command = $builder->build_command;
         system 'mkdir .sigma6' unless -e '.sigma6';
@@ -110,16 +116,13 @@ sub run_build {
     }
 }
 
+sub teardown_smoke {
+    
+}
+
 sub teardown_workspace {
     my $self = shift;
     chdir $self->previous_workspace;
-}
-
-sub check_builds {
-    my $self = shift;
-    my @builds = map { { status => $_->build_status } }
-        $self->plugins_with('-BuildStatus');
-    return @builds;
 }
 
 __PACKAGE__->meta->make_immutable;

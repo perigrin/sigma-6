@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 # ABSTRACT: Repository Plugin API
 
-requires qw(build_id  build_description target repository);
+requires qw(target repository);
 
 1;
 __END__

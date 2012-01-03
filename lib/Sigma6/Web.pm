@@ -23,7 +23,6 @@ sub as_psgi {
     my ( $self, $env ) = @_;
     return sub {
         my $r = Plack::Request->new($env);
-        return $self->HTTP_404 unless $r->path eq '/';
         if ( my $method = $self->can( $env->{REQUEST_METHOD} ) ) {
             return $self->$method($r);
         }
@@ -46,21 +45,37 @@ sub HTTP_404 {
 }
 
 sub POST {
-    my $self = shift;
-    $_->start_smoker for $self->plugins_with('-StartSmoker');
+    my ( $self, $r ) = @_;
+    my $build_data = $r->parameters;
+    my $build      = $self->first_from_plugin_with( '-StartBuild',
+        sub { $_[0]->start_build($build_data) } );
+        
     my $res = Plack::Response->new();
-    $res->redirect('/');
+    $res->redirect( "/$build->{id}" );
     return $res;
 }
 
 sub GET {
-    my $self = shift;
-    my $builds
-        = [ map { $_->check_builds } $self->plugins_with('-CheckBuilds') ];
+    my ( $self, $r ) = @_;
     my $output;
-    for my $html ( $self->plugins_with('-RenderHTML') ) {
-        $output .= $html->render( $builds, $output );
+
+    my $build_id = ( split m|/|, $r->path_info )[-1];
+    if ($build_id) {
+        my $build = $self->first_from_plugin_with( '-CheckBuilds',
+            sub { $_[0]->get_build($build_id) } );
+        for my $html ( $self->plugins_with('-RenderHTML') ) {
+            $output .= $html->render_build( $r, [$build], $output );
+        }
+
     }
+    else {
+        my $builds = [ map { $_->check_all_builds }
+                $self->plugins_with('-CheckBuilds') ];
+        for my $html ( $self->plugins_with('-RenderHTML') ) {
+            $output .= $html->render_all_builds( $builds, $output );
+        }
+    }
+
     my $res = Plack::Response->new(200);
     $res->content_type('text/html');
     $res->body($output);

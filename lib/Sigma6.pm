@@ -6,7 +6,6 @@ use Moose;
 
 use Sigma6::Config;
 use Sigma6::Web;
-use Sigma6::Smoker;
 
 has config => (
     does     => 'Sigma6::Config',

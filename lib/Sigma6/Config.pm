@@ -54,3 +54,30 @@ sub first_from_plugin_with {
 1;
 __END__
 
+=head1 METHODS
+
+=over 
+
+=item plugins 
+
+return an ArrayRef of plugins currently registered
+
+=item find_plugin(CodeRef) 
+
+greps through the plugin list for a plugin list for a plugin that causes
+CodeRef to return true
+
+=item add_plugins (ShortName)
+
+loads plugins matching ShortName from disk into the Plugin list
+
+=item plugins_with (PluginType)
+
+returns a list of plugins that match PluginType
+
+=item first_from_plugin_wtih (PluginType, CodeRef(Plugin))
+
+iterates through the plugins that perform PluginType and returns the first
+true value for CodeRef 
+
+=back

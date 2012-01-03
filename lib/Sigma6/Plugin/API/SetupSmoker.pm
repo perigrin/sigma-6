@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 # ABSTRACT: Sigma6 SetupSmoker Plugin API
 
-requires qw(smoker_command);
+requires qw(setup_smoker);
 
 1;
 __END__

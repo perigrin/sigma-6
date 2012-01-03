@@ -21,9 +21,28 @@ sub setup_workspace {
     $_->setup_workspace for $self->plugins_with('-SetupWorkspace');
 }
 
-sub run_build {
+sub setup_smoker {
     my ($self) = @_;
-    $_->run_build for $self->plugins_with('-RunBuild');
+    $_->setup_smoker for $self->plugins_with('-SetupSmoker');
+}
+
+sub run_smoker {
+    my ($self) = @_;
+    $_->run_smoke for $self->plugins_with('-RunSmoker');
+}
+
+sub record_results {
+    my ($self) = @_;
+    for my $build ( $self->plugins_with('-CheckSmoker') ) {
+        for my $logger ( $self->plugins_with('-RecordResults') ) {
+            $logger->record_results($build);
+        }
+    }
+}
+
+sub teardown_smoker {
+    my ($self) = @_;
+    $_->teardown_workspace for $self->plugins_with('-TeardownSmoker');
 }
 
 sub teardown_workspace {
@@ -31,22 +50,21 @@ sub teardown_workspace {
     $_->teardown_workspace for $self->plugins_with('-TeardownWorkspace');
 }
 
-sub record_results {
+sub teardown_repository {
     my ($self) = @_;
-    for my $build ( $self->plugins_with('-BuildStatus') ) {
-        for my $logger ( $self->plugins_with('-RecordResults') ) {
-            $logger->record_results($build);
-        }
-    }
+    $_->setup_repository for $self->plugins_with('-TeardownRepository');
 }
 
 sub run {
     my $self = shift;
     $self->setup_repository;
     $self->setup_workspace;
-    $self->run_build;
+    $self->setup_smoker;
+    $self->run_smoker;
     $self->record_results;
+    $self->teardown_smoker;
     $self->teardown_workspace;
+    $self->teardown_repository;
 }
 
 __PACKAGE__->meta->make_immutable;
