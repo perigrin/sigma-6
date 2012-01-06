@@ -1,10 +1,11 @@
 package Sigma6::Config;
+use 5.10.1;
 use Moose::Role;
 use namespace::autoclean;
 
 # ABSTRACT: The Sigma6 Plugin Configuration System
 
-requires qw(get_config);
+requires qw(get_section_config);
 
 has plugins => (
     isa     => 'ArrayRef',
@@ -19,15 +20,20 @@ has plugins => (
 
 sub _build_plugins { [] }
 
+use DDP;
+
 around add_plugins => sub {
     my ( $next, $self, @input ) = @_;
-    my @output;
-    for my $name (@input) {
-        $name = 'Sigma6::Plugin::' . ucfirst($name);
-        next if $self->find_plugin( sub { $_->isa($name) } );
-        next unless Class::MOP::load_class($name);
-        push @output, $name->new( config => $self );
+    my @output = map {
+        my $cfg   = $self->get_section_config($_);
+        my $class = "Sigma6::Plugin::\u$_";        
+        $class->new(config => $self, %$cfg)
     }
+    grep { Class::MOP::load_class("Sigma6::Plugin::\u$_") }
+    grep {
+        !$self->find_plugin( sub { blessed(shift) eq "Sigma6::Plugin::\u$_" }
+            )
+    } @input;
     $self->$next(@output);
 };
 

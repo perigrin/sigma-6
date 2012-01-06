@@ -14,6 +14,18 @@ has previous_workspace => (
     default => sub { getcwd() },
 );
 
+has workspace => (
+    isa      => 'Str',
+    is       => 'ro',
+    required => 1
+);
+
+has smoker_command => (
+    isa      => 'Str',
+    is       => 'ro',
+    required => 1,
+);
+
 with qw(
     Sigma6::Plugin::API::SetupSmoker
     Sigma6::Plugin::API::CheckSmoker
@@ -50,18 +62,12 @@ sub _build_build_file {
     "$dir/.sigma6/deps.output";
 }
 
-sub workspace {
-    my $self = shift;
-    my $dir = $self->get_config( key =>'Smoker::Simple.workspace' );
-    mkdir $dir unless -e $dir;
-    my $id = $self->target_name;
-    return "$dir/$id";
-}
-
 sub setup_workspace {
-    my $self = shift;
+    my ( $self, $build_data ) = @_;
     mkdir $self->workspace unless -e $self->workspace;
     chdir $self->workspace;
+    $self->first_from_plugin_with(
+        '-SetupRepository' => sub { shift->setup_repository($build_data) } );
     $ENV{PERL5LIB} .= ':perl5/lib/perl5';
 }
 
@@ -75,11 +81,6 @@ sub smoker_status {
     my $build_file = $self->build_file;
     return `cat $build_file` if -e $build_file;
     return '[nothing yet]';
-}
-
-
-sub smoker_command {
-    $_[0]->get_config( key =>  'Smoker::Simple.smoker_command' );
 }
 
 sub start_smoker {
@@ -99,7 +100,7 @@ sub start_smoker {
 }
 
 sub setup_smoker {
-    
+
 }
 
 sub run_smoke {
@@ -117,7 +118,7 @@ sub run_smoke {
 }
 
 sub teardown_smoke {
-    
+
 }
 
 sub teardown_workspace {

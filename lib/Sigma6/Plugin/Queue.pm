@@ -10,9 +10,9 @@ use Queue::Mmap;
 
 for (qw(file size record_size mode)) {
     has $_ => (
-        is      => 'ro',
-        lazy    => 1,
-        default => sub { $_[0]->get_config( key => "Queue.${_}" ); }
+        is       => 'ro',
+        lazy     => 1,
+        required => 1,
     );
 }
 

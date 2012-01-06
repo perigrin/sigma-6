@@ -11,24 +11,42 @@ has config => (
     handles  => 'Sigma6::Config',
 );
 
+has build_data => (
+    isa     => 'Str',
+    is      => 'ro',
+    lazy    => 1,
+    builder => 'fetch_build_data'
+);
+
+sub fetch_build_data {
+    my $self = shift;
+    my $data;
+    $self->first_from_plugin_with(
+        '-DeQueue' => sub { $data = $_[0]->shift_build } );
+    return $data;
+}
+
 sub setup_repository {
     my ($self) = @_;
-    $_->setup_repository for $self->plugins_with('-SetupRepository');
+    $_->setup_repository( $self->build_data )
+        for $self->plugins_with('-SetupRepository');
 }
 
 sub setup_workspace {
     my ($self) = @_;
-    $_->setup_workspace for $self->plugins_with('-SetupWorkspace');
+    $_->setup_workspace( $self->build_data )
+        for $self->plugins_with('-SetupWorkspace');
 }
 
 sub setup_smoker {
     my ($self) = @_;
-    $_->setup_smoker for $self->plugins_with('-SetupSmoker');
+    $_->setup_smoker( $self->build_data )
+        for $self->plugins_with('-SetupSmoker');
 }
 
 sub run_smoker {
     my ($self) = @_;
-    $_->run_smoke for $self->plugins_with('-RunSmoker');
+    $_->run_smoke( $self->build_data ) for $self->plugins_with('-RunSmoker');
 }
 
 sub record_results {
@@ -42,21 +60,25 @@ sub record_results {
 
 sub teardown_smoker {
     my ($self) = @_;
-    $_->teardown_workspace for $self->plugins_with('-TeardownSmoker');
+    $_->teardown_workspace( $self->build_data )
+        for $self->plugins_with('-TeardownSmoker');
 }
 
 sub teardown_workspace {
     my ($self) = @_;
-    $_->teardown_workspace for $self->plugins_with('-TeardownWorkspace');
+    $_->teardown_workspace( $self->build_data )
+        for $self->plugins_with('-TeardownWorkspace');
 }
 
 sub teardown_repository {
     my ($self) = @_;
-    $_->setup_repository for $self->plugins_with('-TeardownRepository');
+    $_->setup_repository( $self->build_data )
+        for $self->plugins_with('-TeardownRepository');
 }
 
 sub run {
     my $self = shift;
+    $self->fetch_build_data;
     $self->setup_repository;
     $self->setup_workspace;
     $self->setup_smoker;

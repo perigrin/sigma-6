@@ -8,16 +8,11 @@ use Git::Repository;
 
 extends qw(Sigma6::Plugin);
 
-has target => (
+has note_command => (
     isa     => 'Str',
     is      => 'ro',
-    builder => '_build_target',
-    lazy    => 1,
+    default => 'notes --ref=sigma6 add -fm'
 );
-
-sub _build_target {
-    $_[0]->get_config( key => 'Git.target' );
-}
 
 has repository => (
     isa     => 'Git::Repository',
@@ -54,19 +49,6 @@ has workspace => (
 sub _build_workspace {
     my $self = shift;
     $self->first_from_plugin_with( '-Workspace', sub { shift->workspace } );
-}
-
-has note_command => (
-    isa     => 'Str',
-    is      => 'ro',
-    builder => '_build_note_command',
-    lazy    => 1,
-);
-
-sub _build_note_command {
-    my $self = shift;
-    $self->get_config( key => 'Git.note_command' )
-        // 'notes --ref=sigma6 add -fm';
 }
 
 sub target_name {

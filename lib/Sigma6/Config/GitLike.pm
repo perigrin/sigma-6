@@ -13,6 +13,16 @@ use Moose::Util::TypeConstraints;
 
 has '+confname' => ( default => 'sigma6.ini' );
 
+has sections => (
+    isa     => 'ArrayRef',
+    traits  => ['Array'],
+    default => sub { [] },
+    handles => {
+        add_section => 'push',
+        sections    => 'elements',
+    },
+);
+
 sub dir_file {
     my $self = shift;
     return $self->confname;
@@ -27,15 +37,24 @@ sub user_file {
 
 around 'define' => sub {
     my ( $next, $self, %args ) = @_;
-    $self->add_plugins( $args{section} ) if $args{section};
+    $self->add_section( $args{section} ) if $args{section};
     $self->$next(%args);
 };
 
+after load => sub { $_[0]->add_plugins( $_[0]->sections ) };
+
 sub dump { Moose::Object::dump(@_) }
 
-sub get_config { shift->get(@_) }
-
-__PACKAGE__->meta->make_immutable;
+sub get_section_config {
+    my ( $self, $key ) = @_;
+    my $cfg = $self->get_regexp( key => qr/^$key/ );
+    return {} unless $cfg;
+    for ( keys $cfg ) {
+        ( my $k = $_ ) =~ s/^$key\.//;
+        $cfg->{$k} = delete $cfg->{$_};
+    }
+    return $cfg;
+}
 
 ### OVERRIDE ####
 
@@ -254,44 +273,44 @@ sub parse_content {
     }
 }
 
-sub get {
+use DDP;
+
+sub get_regexp {
     my $self = shift;
+
     my %args = (
         key    => undef,
+        filter => undef,
         as     => undef,
-        human  => undef,
-        filter => '',
         @_,
     );
+
     $self->load unless $self->is_loaded;
 
-    my ( $section, $subsection, $name )
-        = Config::GitLike::_split_key( $args{key} );
-    $args{key}
-        = join( '.', grep {defined} ( $section, $subsection, lc $name ), );
+    $args{key} = $args{key};
 
-    return undef unless exists $self->data->{ $args{key} };
-    my $v = $self->data->{ $args{key} };
-    if ( ref $v ) {
-        my @results;
-        if ( defined $args{filter} ) {
-            if ( $args{filter} =~ s/^!// ) {
-                @results = grep { !/$args{filter}/i } @{$v};
-            }
-            else {
-                @results = grep {m/$args{filter}/i} @{$v};
-            }
-        }
-        die "Multiple values" unless @results <= 1;
-        $v = $results[0];
+    my %results;
+    for my $key ( keys %{ $self->data } ) {
+        $results{$key} = $self->data->{$key} if lc $key =~ m/$args{key}/i;
     }
-    return $self->cast(
-        value => $v,
-        as    => $args{as},
-        human => $args{human}
-    );
+    if ( defined $args{filter} ) {
+        if ( $args{filter} =~ s/^!// ) {
+            map { delete $results{$_} if $results{$_} =~ m/$args{filter}/i }
+                keys %results;
+        }
+        else {
+            map { delete $results{$_} if $results{$_} !~ m/$args{filter}/i }
+                keys %results;
+        }
+    }
+
+    @results{ keys %results }
+        = map { $self->cast( value => $results{$_}, as => $args{as} ); }
+        keys %results;
+    return wantarray ? %results : \%results;
 }
 
+__PACKAGE__->meta->make_immutable;
 1;
 __END__
 

@@ -15,7 +15,9 @@ is( $c->user_file, "$ENV{HOME}/.sigma6", 'user_file looks right' );
 
 is_deeply(
     $c->config_files,
-    [ grep { -f $_ } ( $c->global_file, $c->user_file, "$ENV{PWD}/t/etc/sigma6.ini" ) ],
+    [   grep { -f $_ }
+            ( $c->global_file, $c->user_file, "$ENV{PWD}/t/etc/sigma6.ini" )
+    ],
     'config files looks right'
 );
 

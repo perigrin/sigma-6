@@ -11,7 +11,8 @@ with qw(
 
 sub build_id {
     my $self = shift;
-    $self->first_from_plugin_with( '-Repository' => sub { $_[0]->build_id } );
+    $self->first_from_plugin_with(
+        '-Repository' => sub { $_[0]->build_id } );
 }
 
 sub build_description {
@@ -35,12 +36,15 @@ sub check_all_builds {
 }
 
 sub check_build {
+    my ( $self, $build_data ) = @_;
     shift->first_from_plugin_with(
-        '-CheckSmoker' => sub { $_[0]->smoker_status } );
+        '-CheckSmoker' => sub { $_[0]->smoker_status($build_data) } );
 }
 
 sub start_build {
     my ( $self, $build_data ) = @_;
+
+    $build_data->{build_id} = $self->build_id($build_data);
 
     $self->first_from_plugin_with(
         '-Queue' => sub { $_[0]->push_build($build_data) } );
