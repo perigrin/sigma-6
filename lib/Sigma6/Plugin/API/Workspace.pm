@@ -4,6 +4,11 @@ use namespace::autoclean;
 
 # ABSTRACT: Workspace Plugin API
 
+with qw(
+    Sigma6::Plugin::API::SetupWorkspace
+    Sigma6::Plugin::API::TeardownWorkspace
+);
+
 requires qw(workspace);
 
 1;

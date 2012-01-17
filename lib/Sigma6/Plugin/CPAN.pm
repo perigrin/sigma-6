@@ -5,6 +5,7 @@ use namespace::autoclean;
 # ABSTRACT: Sigma6 CPAN Plugin
 
 extends qw(Sigma6::Plugin);
+
 has [
     qw(
         deps_command

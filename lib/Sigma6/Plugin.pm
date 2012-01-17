@@ -5,7 +5,7 @@ use namespace::autoclean;
 # ABSTRACT: The base class for Sigma6 Plugins
 
 has config => (
-    isa      => 'Sigma6::Config',
+    does     => 'Sigma6::Config',
     is       => 'ro',
     required => 1,
     handles  => 'Sigma6::Config',

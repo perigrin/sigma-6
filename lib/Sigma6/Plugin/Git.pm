@@ -14,6 +14,8 @@ has note_command => (
     default => 'notes --ref=sigma6 add -fm'
 );
 
+has target => ( isa => 'Str', is => 'rw', );
+
 has repository => (
     isa     => 'Git::Repository',
     is      => 'ro',
@@ -32,9 +34,7 @@ sub _build_repository {
 }
 
 with qw(
-    Sigma6::Plugin::API::SetupRepository
     Sigma6::Plugin::API::Repository
-    Sigma6::Plugin::API::TeardownRepository
     Sigma6::Plugin::API::RecordResults
 );
 
@@ -69,8 +69,6 @@ sub commit_description {
     $_[0]->git_run( 'log', '--oneline', '-1' );
 }
 
-sub build_id          { shift->commit_id }
-sub build_status      { shift->commit_status }
 sub build_description { shift->commit_description }
 
 sub setup_repository {

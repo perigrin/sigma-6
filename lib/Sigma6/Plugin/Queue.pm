@@ -11,7 +11,6 @@ use Queue::Mmap;
 for (qw(file size record_size mode)) {
     has $_ => (
         is       => 'ro',
-        lazy     => 1,
         required => 1,
     );
 }
@@ -20,7 +19,11 @@ has queue => (
     isa     => 'Queue::Mmap',
     is      => 'ro',
     lazy    => 1,
-    builder => '_build_queue'
+    builder => '_build_queue',
+    handles => {
+        fetch_build => 'pop',
+        push_build  => 'push',
+    }
 );
 
 sub _build_queue {
@@ -32,6 +35,8 @@ sub _build_queue {
         mod    => $self->mode,
     );
 }
+
+with qw(Sigma6::Plugin::API::Queue);
 
 1;
 __END__

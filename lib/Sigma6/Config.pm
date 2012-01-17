@@ -26,14 +26,14 @@ around add_plugins => sub {
     my ( $next, $self, @input ) = @_;
     my @output = map {
         my $cfg   = $self->get_section_config($_);
-        my $class = "Sigma6::Plugin::\u$_";        
-        $class->new(config => $self, %$cfg)
-    }
-    grep { Class::MOP::load_class("Sigma6::Plugin::\u$_") }
-    grep {
+        my $class = "Sigma6::Plugin::\u$_";
+        $class->new( config => $self, %$cfg )
+        }
+        grep { Class::MOP::load_class("Sigma6::Plugin::\u$_") }
+        grep {
         !$self->find_plugin( sub { blessed(shift) eq "Sigma6::Plugin::\u$_" }
             )
-    } @input;
+        } @input;
     $self->$next(@output);
 };
 
@@ -50,6 +50,7 @@ sub plugins_with {
 sub first_from_plugin_with {
     my ( $self, $role, $test ) = @_;
     my @plugins = $self->plugins_with($role);
+    confess "No plugins found for $role" unless @plugins;
     for my $plugin (@plugins) {
         my $value = $plugin->$test;
         next unless $value;

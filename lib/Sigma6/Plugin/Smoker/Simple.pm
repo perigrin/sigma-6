@@ -27,14 +27,7 @@ has smoker_command => (
 );
 
 with qw(
-    Sigma6::Plugin::API::SetupSmoker
-    Sigma6::Plugin::API::CheckSmoker
-    Sigma6::Plugin::API::StartSmoker
-    Sigma6::Plugin::API::RunSmoker
-    Sigma6::Plugin::API::TeardownSmoker
-
-    Sigma6::Plugin::API::SetupWorkspace
-    Sigma6::Plugin::API::TeardownWorkspace
+    Sigma6::Plugin::API::Smoker
     Sigma6::Plugin::API::Workspace
 );
 

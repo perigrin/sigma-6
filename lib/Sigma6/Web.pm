@@ -49,9 +49,9 @@ sub POST {
     my $build_data = $r->parameters;
     my $build      = $self->first_from_plugin_with( '-StartBuild',
         sub { $_[0]->start_build($build_data) } );
-        
+
     my $res = Plack::Response->new();
-    $res->redirect( "/$build->{id}" );
+    $res->redirect("/$build->{id}");
     return $res;
 }
 
@@ -60,20 +60,11 @@ sub GET {
     my $output;
 
     my $build_id = ( split m|/|, $r->path_info )[-1];
-    if ($build_id) {
-        my $build = $self->first_from_plugin_with( '-CheckBuilds',
-            sub { $_[0]->get_build($build_id) } );
-        for my $html ( $self->plugins_with('-RenderHTML') ) {
-            $output .= $html->render_build( $r, [$build], $output );
-        }
-
-    }
-    else {
-        my $builds = [ map { $_->check_all_builds }
-                $self->plugins_with('-CheckBuilds') ];
-        for my $html ( $self->plugins_with('-RenderHTML') ) {
-            $output .= $html->render_all_builds( $builds, $output );
-        }
+    my $builds  = $build_id
+        ? [ $self->first_from_plugin_with( '-CheckBuilds' => sub { $_[0]->get_build($build_id) } ) ]
+        : [ map { $_->check_all_builds } $self->plugins_with('-CheckBuilds') ];
+    for my $html ( $self->plugins_with('-RenderHTML') ) {
+        $output .= $html->render_all_builds( $builds, $output );
     }
 
     my $res = Plack::Response->new(200);
