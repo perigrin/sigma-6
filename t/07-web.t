@@ -36,9 +36,9 @@ test_psgi $app => sub {
     is $res->code, 200, 'got a 200 for /';
     eq_or_diff_html( $res->content, $page{'/'}, 'HTML looks okay' );
 
-    $res = $cb->( POST '/', [ 
-        'Git.target' => 'git@github.com:perigrin/Exportare.git',
-    ] );
+    $res = $cb->(
+        POST '/', [ 'Git.target' => 'git@github.com:perigrin/Exportare.git', ]
+    );
     ok $res->is_redirect, 'got back a redirect';
     diag $res->dump;
 };
