@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 # ABSTRACT: BuildSystem Plugin API
 
-requires qw(smoker_status);
+requires qw(check_smoker);
 
 1;
 __END__

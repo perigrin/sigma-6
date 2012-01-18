@@ -59,17 +59,10 @@ sub setup_workspace {
     my ( $self, $build_data ) = @_;
     mkdir $self->workspace unless -e $self->workspace;
     chdir $self->workspace;
-    $self->first_from_plugin_with(
-        '-SetupRepository' => sub { shift->setup_repository($build_data) } );
     $ENV{PERL5LIB} .= ':perl5/lib/perl5';
 }
 
-sub target_name {
-    shift->first_from_plugin_with( '-Repository' => sub { shift->target_name }
-    );
-}
-
-sub smoker_status {
+sub check_smoker {
     my $self       = shift;
     my $build_file = $self->build_file;
     return `cat $build_file` if -e $build_file;
@@ -92,9 +85,8 @@ sub start_smoker {
     }
 }
 
-sub setup_smoker {
-
-}
+sub setup_smoker    { }
+sub teardown_smoker { }
 
 sub run_smoke {
     my $self       = shift;

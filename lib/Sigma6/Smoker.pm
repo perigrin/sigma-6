@@ -12,19 +12,15 @@ has config => (
 );
 
 has build_data => (
-    isa     => 'Str',
-    is      => 'ro',
-    lazy    => 1,
-    builder => 'fetch_build_data'
+    is        => 'ro',
+    clearer   => 'clear_build_data',
+    predicate => 'has_build_data',
+    lazy      => 1,
+    default   => sub {
+        shift->first_from_plugin_with(
+            '-DequeueBuild' => sub { $_[0]->fetch_build } );
+    }
 );
-
-sub fetch_build_data {
-    my $self = shift;
-    my $data;
-    $self->first_from_plugin_with(
-        '-DeQueue' => sub { $data = $_[0]->shift_build } );
-    return $data;
-}
 
 sub setup_repository {
     my ($self) = @_;
@@ -51,16 +47,18 @@ sub run_smoker {
 
 sub record_results {
     my ($self) = @_;
-    for my $build ( $self->plugins_with('-CheckSmoker') ) {
+    for my $smoker ( $self->plugins_with('-CheckSmoker') ) {
         for my $logger ( $self->plugins_with('-RecordResults') ) {
-            $logger->record_results($build);
+            my $build   = $self->build_data;
+            my $results = $smoker->check_smoker( $self->build_data );
+            $logger->record_results( $results, $build );
         }
     }
 }
 
 sub teardown_smoker {
     my ($self) = @_;
-    $_->teardown_workspace( $self->build_data )
+    $_->teardown_smoker( $self->build_data )
         for $self->plugins_with('-TeardownSmoker');
 }
 
@@ -78,15 +76,15 @@ sub teardown_repository {
 
 sub run {
     my $self = shift;
-    $self->fetch_build_data;
-    $self->setup_repository;
     $self->setup_workspace;
+    $self->setup_repository;
     $self->setup_smoker;
     $self->run_smoker;
     $self->record_results;
     $self->teardown_smoker;
-    $self->teardown_workspace;
     $self->teardown_repository;
+    $self->teardown_workspace;
+    $self->clear_build_data;
 }
 
 __PACKAGE__->meta->make_immutable;
