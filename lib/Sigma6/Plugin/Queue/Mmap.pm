@@ -1,4 +1,4 @@
-package Sigma6::Plugin::Queue;
+package Sigma6::Plugin::Queue::Mmap;
 use Moose;
 use namespace::autoclean;
 
@@ -7,13 +7,12 @@ use namespace::autoclean;
 extends qw(Sigma6::Plugin);
 
 use Queue::Mmap;
+use JSON::Any;
 
-for (qw(file size record_size mode)) {
-    has $_ => (
-        is       => 'ro',
-        required => 1,
-    );
-}
+has [qw(file size record_size mode)] => (
+    is       => 'ro',
+    required => 1,
+);
 
 has queue => (
     isa     => 'Queue::Mmap',
@@ -35,6 +34,17 @@ sub _build_queue {
         mod    => $self->mode,
     );
 }
+
+around push_build => sub {
+    my ( $next, $self, $data ) = splice @_, 0, 3;
+    $self->$next( JSON::Any->encode($data) );
+};
+
+around fetch_build => sub {
+    my ( $next, $self ) = splice @_, 0, 2;
+    my $data = $self->$next(@_);
+    JSON::Any->decode($data);
+};
 
 with qw(Sigma6::Plugin::API::Queue);
 
