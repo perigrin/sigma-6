@@ -32,12 +32,6 @@ sub target {
     $self->first_from_plugin_with( '-Repository', sub { shift->target } );
 }
 
-sub target_name {
-    my $self = shift;
-    $self->first_from_plugin_with( '-Repository',
-        sub { shift->target_name } );
-}
-
 sub build_template {
     return \qq[
     <!DOCTYPE html>
@@ -46,7 +40,7 @@ sub build_template {
             <title>Sigma6</title>
         </head>
         <body>
-            <h1>[% o.target_name %]</h1>
+            <h1>[% o.target %]</h1>
             <h2>Build [% b.id %]</h2>
     	    <p><i>[% b.description %]</i></p>
             <form action="/" method="POST"><input type="submit" value="Build"/></form>
@@ -64,7 +58,7 @@ sub all_builds_template {
         <title>Sigma6</title>
     </head>
     <body>
-    <h1>[% o.target_name %]</h1>
+    <h1>[% o.target %]</h1>
     [% UNLESS builds.count %]
         <p>Nothing Built Yet</p>
     [% ELSE %]
