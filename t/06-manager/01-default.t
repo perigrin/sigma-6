@@ -39,11 +39,15 @@ use Sigma6::Config::Simple;
 }
 
 {
-    use Sigma6::Plugin::Queue::Mmap;
 
-    package Sigma6::Plugin::Queue::Mmap;
+    package Sigma6::Plugin::Test::Queue;
     use Moose;
-    before push_build => sub { ::pass('added build') };
+    extends qw(Sigma6::Plugin);
+    with qw(Sigma6::Plugin::API::Queue);
+
+    my $build;
+    sub push_build { ::ok $build = $_[1], 'got a build' }
+    sub fetch_build { ::ok('fetch_build'); $build }
 }
 
 my ( $fh, $file ) = tempfile();
@@ -52,12 +56,7 @@ my $c = Sigma6::Config::Simple->new(
     'Build::Manager'   => {},
     'Test::Repository' => {},
     'Test::Smoker'     => {},
-    'Queue::Mmap'      => {
-        file        => $file,
-        size        => 10,
-        record_size => 20,
-        mode        => 0666,
-    },
+    'Test::Queue'      => {},
 );
 
 ok my ($manager) = $c->plugins_with('-BuildManager'), 'got Manager';
@@ -82,8 +81,7 @@ ok my @builds = $manager->check_all_builds(), 'check all builds works';
 is @builds, 1, 'got the right number of builds';
 
 is_deeply $c->first_from_plugin_with(
-    '-CheckBuild' => sub { $_[0]->check_build($build_id) }
-    ),
+    '-CheckBuild' => sub { $_[0]->check_build($build_id) } ),
     $builds[0], 'CheckBuild looks right';
 
 done_testing();
