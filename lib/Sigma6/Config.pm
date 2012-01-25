@@ -24,27 +24,34 @@ use DDP;
 
 around add_plugins => sub {
     my ( $next, $self, @input ) = @_;
-    my @output = map {
+    my %seen        = ();
+    my $seen_plugin = sub {
+        my $class = "Sigma6::Plugin::$_[0]";
+        return if $self->find_plugin( sub { blessed($_) eq $class } );
+        return if $seen{$class}++;
+        return $class;
+    };
+
+    my $load_class = sub { Class::MOP::load_class("Sigma6::Plugin::$_") };
+
+    my $new_plugin = sub {
         my $cfg   = $self->get_section_config($_);
         my $class = "Sigma6::Plugin::\u$_";
-        $class->new( config => $self, %$cfg )
-        }
-        grep { Class::MOP::load_class("Sigma6::Plugin::\u$_") }
-        grep {
-        !$self->find_plugin( sub { blessed(shift) eq "Sigma6::Plugin::\u$_" }
-            )
-        } @input;
+        $class->new( config => $self, %$cfg );
+    };
+
+    my @output = map { $new_plugin->($_) }
+        grep { $load_class->($_) }
+        grep { $seen_plugin->($_) } map { ucfirst $_ } @input;
+
+    #    warn p @output;
     $self->$next(@output);
 };
 
 sub plugins_with {
-    my ( $self, @plugins ) = @_;
-    my @output = ();
-    for my $plugin (@plugins) {
-        $plugin =~ s/^-/Sigma6::Plugin::API::/;
-        push @output, $self->find_plugin( sub { $_->does($plugin) } );
-    }
-    return @output;
+    my ( $self, $name ) = @_;
+    $name =~ s/^-/Sigma6::Plugin::API::/;
+    return $self->find_plugin( sub { $_->does($name) } );
 }
 
 sub first_from_plugin_with {

@@ -57,15 +57,14 @@ sub POST {
 
 sub GET {
     my ( $self, $r ) = @_;
-    my $output;
-
     my $build_id = ( split m|/|, $r->path_info )[-1];
     my $builds  = $build_id
-        ? [ $self->first_from_plugin_with( '-CheckBuilds' => sub { $_[0]->get_build($build_id) } ) ]
-        : [ map { $_->check_all_builds } $self->plugins_with('-CheckBuilds') ];
-    for my $html ( $self->plugins_with('-RenderHTML') ) {
-        $output .= $html->render_all_builds( $builds, $output );
-    }
+        ? [ $self->first_from_plugin_with( '-CheckBuild' => sub { $_[0]->get_build($build_id) } ) ]
+        : [ map { $_->check_all_builds } $self->plugins_with('-CheckBuild') ];
+        
+    my $output = join '',
+        map { $_->render_all_builds( $builds ) }
+        $self->plugins_with('-RenderHTML');
 
     my $res = Plack::Response->new(200);
     $res->content_type('text/html');

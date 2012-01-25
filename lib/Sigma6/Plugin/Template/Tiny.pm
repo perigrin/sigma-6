@@ -32,6 +32,11 @@ sub target {
     $self->first_from_plugin_with( '-Repository', sub { shift->target } );
 }
 
+sub repo_plugins {
+    my $self = shift;
+    [$self->plugins_with('-Repository')];
+}
+
 sub build_template {
     return \qq[
     <!DOCTYPE html>
@@ -42,7 +47,7 @@ sub build_template {
         <body>
             <h1>[% o.target %]</h1>
             <h2>Build [% b.id %]</h2>
-    	    <p><i>[% b.description %]</i></p>
+            <p><i>[% b.description %]</i></p>
             <form action="/" method="POST"><input type="submit" value="Build"/></form>
             <div><pre><code>[% b.status %]</code></pre></div>
         </body>
@@ -58,17 +63,26 @@ sub all_builds_template {
         <title>Sigma6</title>
     </head>
     <body>
-    <h1>[% o.target %]</h1>
-    [% UNLESS builds.count %]
-        <p>Nothing Built Yet</p>
-    [% ELSE %]
-    [% FOREACH b IN builds %]
-        <h2>Build [% b.id %]</h2>
-	    <p><i>[% b.description %]</i></p>
-        <form action="/" method="POST"><input type="submit" value="Build"/></form>
-        <div><pre><code>[% b.status %]</code></pre></div>
+    <h1>Sigma6 Builds</h1>
+    [%- UNLESS builds.count %]
+        <p>No Builds Yet</p>
+    [%- ELSE -%]
+        [% FOREACH b IN builds %]
+            <h2>Build [% b.id %]</h2>
+            <p><i>[% b.description %]</i></p>
+            <form action="/" method="POST"><input type="submit" value="Build"/></form>
+            <div><pre><code>[% b.status %]</code></pre></div>
+        [% END %]
     [% END %]
-    [% END %]
+    <form method='POST' action="/">
+        <select name="some_name" id="some_name" onchange="" size="1">
+            [%- FOREACH plugin IN o.repo_plugins %]
+            <option value="[% plugin.name %]">[% plugin.name %]</option>
+            [%- END %]
+        </select>
+        <input type="text" value="target" />
+        <input type="submit">
+    </form>
     </body>
 </html>
 ]

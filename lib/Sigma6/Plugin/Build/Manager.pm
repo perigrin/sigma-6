@@ -13,7 +13,7 @@ has builds => (
     default => sub { {} },
     handles => {
         _set_build     => 'set',
-        get_build      => 'get',
+        get_build      => 'get',        
         list_build_ids => 'keys',
     }
 );
@@ -46,10 +46,11 @@ sub check_build {
 
 sub start_build {
     my ( $self, $build_data ) = @_;
-
+    
+    
     $build_data->{description} //= $self->build_description($build_data);
     $build_data->{id} = $self->build_id($build_data);
-
+    
     $self->_set_build( $build_data->{id} => $build_data );
 
     $self->first_from_plugin_with(
@@ -58,7 +59,7 @@ sub start_build {
     $self->first_from_plugin_with(
         '-StartSmoker' => sub { $_[0]->start_smoker } );
 
-    return $build_data->{id};
+    return $build_data;
 }
 
 1;

@@ -30,11 +30,12 @@ sub _build_workspace {
 }
 
 has repository => (
-    isa     => 'Git::Wrapper',
-    is      => 'rw',
-    lazy    => 1,
-    builder => "_build_repository",
-    clearer => '_clear_repository',
+    isa       => 'Git::Wrapper',
+    is        => 'rw',
+    lazy      => 1,
+    builder   => "_build_repository",
+    clearer   => '_clear_repository',
+    predicate => 'has_repository',
 );
 
 sub _build_repository {
@@ -50,16 +51,22 @@ with qw(
 );
 
 sub commit_id {
-    my $self = shift;
-    my ($sha1) = $self->repository->_cmd( 'ls-remote', $self->target, 'HEAD' );
+    my ( $self, $build_data ) = @_;
+    $self->setup_repository($build_data) unless $self->has_repository;
+    my ($sha1)
+        = $self->repository->_cmd( 'ls-remote', $self->target, 'HEAD' );
     return substr( $sha1, 0, 7 );
 }
 
 sub commit_status {
+    my ( $self, $build_data ) = @_;
+    $self->setup_repository($build_data) unless $self->has_repository;
     $_[0]->repository->notes( 'show', 'HEAD' ) || '';
 }
 
 sub commit_description {
+    my ( $self, $build_data ) = @_;
+    $self->setup_repository($build_data) unless $self->has_repository;
     my ($desc) = $_[0]->repository->_cmd( 'log', '--oneline', '-1' );
     return $desc;
 }
@@ -82,8 +89,7 @@ sub teardown_repository {
 sub record_results {
     my ( $self, $plugin ) = @_;
     return if $plugin == $self;
-    $self->repository->notes( '--ref=sigma6 add -fm', $plugin->build_status,
-        'HEAD' );
+    $self->repository->notes( '--ref=sigma6 add -fm',  $plugin->build_status, 'HEAD' );
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -37,13 +37,13 @@ sub _build_queue {
 
 around push_build => sub {
     my ( $next, $self, $data ) = splice @_, 0, 3;
-    $self->$next( JSON::Any->encode($data) );
+    $self->$next( JSON::Any->new( allow_blessed => 1 )->encode($data) );
 };
 
 around fetch_build => sub {
     my ( $next, $self ) = splice @_, 0, 2;
     my $data = $self->$next(@_);
-    JSON::Any->decode($data);
+    JSON::Any->new( allow_blessed => 1 )->decode($data);
 };
 
 with qw(Sigma6::Plugin::API::Queue);

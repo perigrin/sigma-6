@@ -11,6 +11,11 @@ has config => (
     handles  => 'Sigma6::Config',
 );
 
+sub name { 
+    my ($name) = shift->meta->name =~ m/::(\w+)$/;
+    return $name;
+}
+
 __PACKAGE__->meta->make_immutable;
 1;
 __END__
