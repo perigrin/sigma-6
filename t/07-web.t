@@ -37,6 +37,7 @@ my ( $fh, $file ) = tempfile();
 my %config = (
     'Build::Manager' => {},
     'Template::Tiny' => {},
+    'JSON'           => {},
     'Queue::Mmap'    => {
         file        => $file,
         size        => 10,
@@ -77,19 +78,35 @@ my %page = (
 );
 
 test_psgi $app => sub {
-    my $cb  = shift;
-    my $res = $cb->( GET "/" );
+    my $cb = shift;
+    my $res = $cb->( GET "/", 'Accept' => 'text/html' );
     is $res->code, 200, 'got a 200 for /';
     eq_or_diff_html( $res->content, $page{'/'}, 'HTML looks okay' );
 
-    $res = $cb->(
-        POST '/', [ 'Git.target' => 'git@github.com:perigrin/Exportare.git', ]
-    );
-    ok $res->is_redirect, 'got back a redirect';
-    my $location = $res->header('Location');
-    $res = $cb->( GET $location );
-    is $res->code, 200, "got 200 for $location";
-    diag $res->dump;
+    {
+        $res = $cb->(
+            POST '/',
+            [ 'Git.target' => 'git@github.com:perigrin/Exportare.git', ]
+        );
+        ok $res->is_redirect, 'got back a redirect';
+
+        my $location = $res->header('Location');
+        $res = $cb->( GET $location );
+        is $res->code, 200, "got 200 for $location";
+    }
+
+    {
+        my $res = $cb->(
+            POST '/',
+            [ 'Git.target' => 'git@github.com:perigrin/json-any.git', ]
+        );
+        ok $res->is_redirect, 'got back a redirect';
+
+        my $location = $res->header('Location');
+        $res = $cb->( GET $location );
+        is $res->code, 200, "got 200 for $location";
+        diag $res->dump;
+    }
 };
 
 done_testing;

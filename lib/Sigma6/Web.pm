@@ -46,7 +46,7 @@ sub HTTP_404 {
 
 sub POST {
     my ( $self, $r ) = @_;
-    my $build_data = $r->parameters;
+    my $build_data = $r->parameters->as_hashref;
     my $build      = $self->first_from_plugin_with( '-StartBuild',
         sub { $_[0]->start_build($build_data) } );
 
@@ -55,19 +55,27 @@ sub POST {
     return $res;
 }
 
+use HTTP::Negotiate;
+
 sub GET {
     my ( $self, $r ) = @_;
     my $build_id = ( split m|/|, $r->path_info )[-1];
-    my $builds  = $build_id
+    my $renderer = HTTP::Negotiate::choose(
+        [   [ '-RenderJSON', 1.000, 'application/json', ],
+            [ '-RenderHTML', 1.000, 'text/html', ],
+        ],
+        $r->headers
+    );
+
+    my $builds
+        = $build_id
         ? [ $self->first_from_plugin_with( '-CheckBuild' => sub { $_[0]->get_build($build_id) } ) ]
         : [ map { $_->check_all_builds } $self->plugins_with('-CheckBuild') ];
-        
-    my $output = join '',
-        map { $_->render_all_builds( $builds ) }
-        $self->plugins_with('-RenderHTML');
+
+
+    my $output = $self->first_from_plugin_with($renderer => sub { $_[0]->render_all_builds($r, $builds)});
 
     my $res = Plack::Response->new(200);
-    $res->content_type('text/html');
     $res->body($output);
     return $res;
 }

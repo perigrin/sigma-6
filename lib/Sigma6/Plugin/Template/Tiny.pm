@@ -15,7 +15,7 @@ sub render_build {
 }
 
 sub render_all_builds {
-    my ( $self, $builds ) = @_;
+    my ( $self, $r, $builds ) = @_;
     my $vars = { o => $self, builds => $builds };
     Template::Tiny->new->process(
         ( $self->all_builds_template, $vars ) => \( my $output ) );

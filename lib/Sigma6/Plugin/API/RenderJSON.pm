@@ -1,4 +1,4 @@
-package Sigma6::Plugin::API::RenderHTML;
+package Sigma6::Plugin::API::RenderJSON;
 use Moose::Role;
 use namespace::autoclean;
 
