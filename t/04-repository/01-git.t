@@ -33,10 +33,6 @@ my $build_data = { 'Git.target' => 'git@github.com:perigrin/Exportare.git', };
 $c->first_from_plugin_with(
     '-SetupRepository' => sub { shift->setup_repository($build_data) } );
 
-is $repo[0]->target, $build_data->{'Git.target'}, 'right target';
-is $c->first_from_plugin_with( '-Repository' => sub { shift->target } ),
-    $build_data->{'Git.target'}, '... even when we check the long way';
-
 ok -d $workspace, 'workspace exists';
 
 my $sha1 = substr(
