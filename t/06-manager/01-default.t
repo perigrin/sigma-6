@@ -28,8 +28,10 @@ use Sigma6::Config::Simple;
     extends qw(Sigma6::Plugin);
     with qw(Sigma6::Plugin::API::Repository);
 
+    my $id = 1;
+    sub commit_id { $id++ }
+
     sub commit_description  {''}
-    sub commit_id           {1}
     sub commit_status       {''}
     sub repository          {''}
     sub setup_repository    {''}
@@ -45,9 +47,9 @@ use Sigma6::Config::Simple;
     extends qw(Sigma6::Plugin);
     with qw(Sigma6::Plugin::API::Queue);
 
-    my $build;
-    sub push_build { ::ok $build = $_[1], 'got a build' }
-    sub fetch_build { ::ok('fetch_build'); $build }
+    my @builds;
+    sub push_build { ::ok push( @builds, $_[1] ), 'got a build' }
+    sub fetch_build { ::ok('fetch_build'); shift @builds }
 }
 
 my ( $fh, $file ) = tempfile();
@@ -71,17 +73,28 @@ is( $_, $manager, "StartBuild is the same" )
 
 can_ok $manager, qw(start_build check_build check_all_builds);
 
-ok my $build_id
-    = $manager->start_build(
-    { 'Git.target' => 'git@github.com:perigrin/Exportare.git' } ),
-    'added a simple build';
+{
+    ok my $build
+        = $manager->start_build(
+        { 'Git.target' => 'git@github.com:perigrin/Exportare.git' } ),
+        'added a simple build';
+    is_deeply $manager->get_build( $build->{id} ),
+        $build, 'build data is stored properly';
 
-ok $manager->get_build($build_id), 'build data is stored properly';
-ok my @builds = $manager->check_all_builds(), 'check all builds works';
-is @builds, 1, 'got the right number of builds';
-
-is_deeply $c->first_from_plugin_with(
-    '-CheckBuild' => sub { $_[0]->check_build($build_id) } ),
-    $builds[0], 'CheckBuild looks right';
+    is_deeply $c->first_from_plugin_with(
+        '-CheckBuild' => sub { $_[0]->check_build( $build->{id} ) }
+        ),
+        $build, 'CheckBuild looks right';
+}
+{
+    ok my @builds = $manager->check_all_builds(), 'check all builds works';
+    is @builds, 1, 'got the right number of builds';
+}
+{
+    $manager->start_build( { 'CPAN.target' => 'Moose' } );
+    ok my @builds = $manager->check_all_builds(), 'check all builds works';
+    is @builds, 2, 'got the right number of builds';
+}
 
 done_testing();
+

@@ -55,13 +55,6 @@ sub _build_build_file {
     "$dir/.sigma6/deps.output";
 }
 
-sub setup_workspace {
-    my ( $self, $build_data ) = @_;
-    mkdir $self->workspace unless -e $self->workspace;
-    chdir $self->workspace;
-    $ENV{PERL5LIB} .= ':perl5/lib/perl5';
-}
-
 sub check_smoker {
     my $self       = shift;
     my $build_file = $self->build_file;
@@ -93,7 +86,7 @@ sub run_smoke {
     my $deps_file  = $self->deps_file;
     my $build_file = $self->build_file;
 
-    for my $builder ( $self->plugins_with('-SmokeCommands') ) {
+    for my $builder ( $self->plugins_with('-Smoker') ) {
         my $deps_command  = $builder->deps_command;
         my $build_command = $builder->build_command;
         system 'mkdir .sigma6' unless -e '.sigma6';
@@ -104,6 +97,13 @@ sub run_smoke {
 
 sub teardown_smoke {
 
+}
+
+sub setup_workspace {
+    my ( $self, $build_data ) = @_;
+    mkdir $self->workspace unless -e $self->workspace;
+    chdir $self->workspace;
+    $ENV{PERL5LIB} .= ':perl5/lib/perl5';
 }
 
 sub teardown_workspace {
