@@ -15,26 +15,28 @@ with qw(
 );
 
 sub target {
-  my ($self, $build) = @_;
-  return $build->{'Git.target'};
+    my ( $self, $build ) = @_;
+    confess 'No Git.target key' unless exists $build->{'Git.target'};
+    return $build->{'Git.target'};
 }
 
 sub workspace {
-    my ($self, $build) = @_;
+    my ( $self, $build ) = @_;
     $self->first_from_plugin_with( '-Workspace' => sub { shift->workspace } );
 }
 
 sub repository {
-    my ($self, $build) = @_;
-    my $git  = Git::Wrapper->new( $self->workspace . '/' );
+    my ( $self, $build ) = @_;
+    my $git = Git::Wrapper->new( $self->workspace . '/' );
     $git->clone( $self->target($build) => $git->dir ) unless -e $git->dir;
     return $git;
 }
 
 sub commit_id {
     my ( $self, $build ) = @_;
-    my ($sha1)
-        = $self->repository($build)->_cmd( 'ls-remote', $self->target($build),  'HEAD' );
+    my $target = $self->target($build);
+    my $repo   = $self->repository($build);
+    my ($sha1) = $repo->_cmd( 'ls-remote', $target, 'HEAD' );
     return substr( $sha1, 0, 7 );
 }
 

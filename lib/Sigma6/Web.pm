@@ -7,6 +7,8 @@ use Moose;
 use Sigma6::Config;
 use Plack::Request;
 use Plack::Response;
+use Try::Tiny;
+use HTTP::Negotiate;
 
 has config => (
     does     => 'Sigma6::Config',
@@ -46,16 +48,19 @@ sub HTTP_404 {
 
 sub POST {
     my ( $self, $r ) = @_;
-    my $build_data = $r->parameters->as_hashref;
-    my $build      = $self->first_from_plugin_with( '-StartBuild',
+    my $data       = $r->parameters->as_hashref;
+    my $build_data = try {
+        $self->first_from_plugin_with(
+            '-BuildData' => sub { shift->build_data($data) } );
+    }
+    catch {$data};
+    my $build = $self->first_from_plugin_with( '-StartBuild',
         sub { $_[0]->start_build($build_data) } );
 
     my $res = Plack::Response->new();
     $res->redirect("/$build->{id}");
     return $res;
 }
-
-use HTTP::Negotiate;
 
 sub GET {
     my ( $self, $r ) = @_;
@@ -69,11 +74,15 @@ sub GET {
 
     my $builds
         = $build_id
-        ? [ $self->first_from_plugin_with( '-CheckBuild' => sub { $_[0]->get_build($build_id) } ) ]
+        ? [
+        $self->first_from_plugin_with(
+            '-CheckBuild' => sub { $_[0]->get_build($build_id) }
+        )
+        ]
         : [ map { $_->check_all_builds } $self->plugins_with('-CheckBuild') ];
 
-
-    my $output = $self->first_from_plugin_with($renderer => sub { $_[0]->render_all_builds($r, $builds)});
+    my $output = $self->first_from_plugin_with(
+        $renderer => sub { $_[0]->render_all_builds( $r, $builds ) } );
 
     my $res = Plack::Response->new(200);
     $res->body($output);
