@@ -118,9 +118,11 @@ test_psgi $app => sub {
             POST '/',
             [ 'Git.target' => 'git@github.com:perigrin/Exportare.git', ]
         );
-        ok $res->is_redirect, 'got back a redirect';
+        is $res->code, 202, 'got a 202';
 
-        my $location = $res->header('Location');
+        # ok $res->is_redirect, 'got back a redirect';
+
+        ok my $location = $res->header('Location'), 'got location header';
         $res = $cb->( GET $location );
         is $res->code, 200, "got 200 for $location";
     }
@@ -138,9 +140,11 @@ test_psgi $app => sub {
             POST '/',
             [ 'Git.target' => 'git@github.com:perigrin/json-any.git', ]
         );
-        ok $res->is_redirect, 'got back a redirect';
+        is $res->code, 202, 'got a 202';
 
-        my $location = $res->header('Location');
+        # ok $res->is_redirect, 'got back a redirect';
+
+        ok my $location = $res->header('Location'), 'got location header';
         $res = $cb->( GET $location );
         is $res->code, 200, "got 200 for $location";
     }

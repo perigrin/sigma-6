@@ -58,7 +58,7 @@ sub POST {
         sub { $_[0]->start_build($build_data) } );
 
     my $res = Plack::Response->new();
-    $res->redirect("/$build->{id}");
+    $res->redirect("/$build->{id}", 202);
     return $res;
 }
 
