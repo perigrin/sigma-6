@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sigma6</title>
+    </head>
+    <body>
+        <h1>[% o.target %]</h1>
+        <h2>Build [% b.id %]</h2>
+        <p><i>[% b.description %]</i></p>
+        <form action="/" method="POST"><input type="submit" value="Build"/></form>
+        <div><pre><code>[% b.status %]</code></pre></div>
+    </body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sigma6</title>
+    </head>
+    <body>
+    <h1>Sigma6 Builds</h1>
+    [%- UNLESS builds.count %]
+        <p>No Builds Yet</p>
+    [%- ELSE -%]
+        [% FOREACH b IN builds %]
+            <h2>Build [% b.id %]</h2>
+            <p><i>[% b.description %]</i></p>
+            <form action="/" method="POST"><input type="submit" value="Build"/></form>
+            <div><pre><code>[% b.status %]</code></pre></div>
+        [% END %]
+    [% END %]
+    <form method='POST' action="/">
+        <select name="some_name" id="some_name" onchange="" size="1">
+            [%- FOREACH plugin IN o.repo_plugins %]
+            <option value="[% plugin.name %]">[% plugin.name %]</option>
+            [%- END %]
+        </select>
+        <input type="text" value="target" />
+        <input type="submit">
+    </form> 
+    </body>
+</html>
