@@ -2,27 +2,67 @@
 <html>
     <head>
         <title>Sigma6</title>
+        <link rel="stylesheet" href="/static/css/style.css" type="text/css" />
+        <script src="/static/js/vendors/modernizr-2.0.6.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+        <script src="/static/js/vendors/ember-latest.min.js"></script>
+        <script src="/static/js/vendors/ember-rest.js"></script>
+        <script src="/static/js/plugins.js"></script>    
+        <script src="/static/js/app.js"></script>
+    <script type="text/x-handlebars" data-template-name="list-template">
+    <ul>
+      {{#each builds}}
+        <li>{{view App.ShowBuildView buildBinding="this"}}</li>
+      {{/each}}
+      {{#if isNewVisible}}
+          <li class="new">
+            {{view App.NewBuildView}}
+          </li>
+      {{/if}}
+    <div class="commands">
+      <a href="#" {{action "showNew"}}>New Build</a>
+      <a href="#" {{action "refreshListing"}}>Refresh Listing</a>
+    </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="show-template">
+    <li class="data">
+      {{build.id}}
+      {{#if isEditing}}
+        {{view App.EditBuildView}}
+      {{else}}
+        {{build.target}}
+      {{/if}}
+     </li>
+      <div class="commands">
+        {{#unless isEditing}}
+          <a href="#" {{action "showEdit"}}>Edit</a>
+          <a href="#" {{action "destroyRecord"}}>Remove</a>
+        {{/unless}}
+      </div>
+    </td>
+    </script>
+    <script type="text/x-handlebars" data-template-name="edit-template">
+    {{#with build}}
+      {{view Ember.TextField valueBinding="target"  placeholder="Target"}}
+      {{#if id}}
+        {{submitButton "Update"}}
+      {{else}}
+        {{submitButton "Create"}}
+      {{/if}}
+    {{/with}}
+    <a href="#" {{action "cancelForm"}}>Cancel</a>
+    </script>
+    <!-- end scripts-->
     </head>
     <body>
     <h1>Sigma6 Builds</h1>
-    [%- UNLESS builds.count %]
-        <p>No Builds Yet</p>
-    [%- ELSE -%]
-        [% FOREACH b IN builds %]
-            <h2>Build [% b.id %]</h2>
-            <p><i>[% b.description %]</i></p>
-            <form action="/" method="POST"><input type="submit" value="Build"/></form>
-            <div><pre><code>[% b.status %]</code></pre></div>
-        [% END %]
-    [% END %]
-    <form method='POST' action="/">
-        <select name="some_name" id="some_name" onchange="" size="1">
-            [%- FOREACH plugin IN o.repo_plugins %]
-            <option value="[% plugin.name %]">[% plugin.name %]</option>
-            [%- END %]
-        </select>
-        <input type="text" value="target" />
-        <input type="submit">
-    </form> 
+    <script type="text/x-handlebars">
+        {{ view App.ListBuildsView }}
+    </script>
+    <script type="text/javascript">
+        $(function() {
+            App.buildsController.findAll();
+        });
+    </script>
     </body>
 </html>

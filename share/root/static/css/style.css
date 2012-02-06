@@ -1,0 +1,17 @@
+html { 
+        background-color: #ccc; 
+        height: 100%; 
+        width: 100%; 
+        font-size: 14px;
+        font-family: Helvetica, san-serif;
+}
+body { 
+        width: 80%; 
+        margin: auto; 
+        background-color: white; 
+        border: 1px solid black; 
+        min-height: 600px; 
+        padding: 1em;
+}
+
+

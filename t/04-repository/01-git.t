@@ -28,29 +28,30 @@ ok my @repo = $c->plugins_with('-Repository'), 'got the repository';
 is @repo, 1, 'only one repo configured';
 isa_ok $repo[0], 'Sigma6::Plugin::Git';
 
-my $build_data = { 'Git.target' => 'git@github.com:perigrin/Exportare.git', };
+my $build = { 'Git.target' => 'git@github.com:perigrin/Exportare.git', };
 
 $c->first_from_plugin_with(
-    '-SetupRepository' => sub { shift->setup_repository($build_data) } );
+    '-SetupRepository' => sub { shift->setup_repository($build) } );
 
 ok -d $workspace, 'workspace exists';
-
+my $dir = $workspace. '/'. $repo[0]->humanish($build->{'Git.target'});
+ok -d $dir, 'workdir exists too';
 my $sha1 = substr(
-    (   Git::Wrapper->new($workspace)
-            ->_cmd( 'ls-remote', $build_data->{'Git.target'}, 'HEAD' )
+    (   Git::Wrapper->new($dir)
+            ->_cmd( 'ls-remote', $build->{'Git.target'}, 'HEAD' )
     )[0],
     0, 7
 );
 
 is $c->first_from_plugin_with(
-    '-Repository' => sub { $_[0]->commit_id($build_data); }
+    '-Repository' => sub { $_[0]->commit_id($build); }
     ),
     $sha1, 'got a commit_id';
 
-my ($desc) = Git::Wrapper->new($workspace)->_cmd( 'log', '--oneline', '-1' );
+my ($desc) = Git::Wrapper->new($dir)->_cmd( 'log', '--oneline', '-1' );
 
 is $c->first_from_plugin_with(
-    '-Repository' => sub { $_[0]->commit_description($build_data) } ), $desc,
+    '-Repository' => sub { $_[0]->commit_description($build) } ), $desc,
     'got a commit_description';
 
 done_testing();

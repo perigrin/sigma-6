@@ -5,7 +5,7 @@ use File::Find;
 
 find(
     sub {
-        m/\.pm/ or return;
+        m/\.pm$/ or return;
         my $_ = $File::Find::name;
         s|/|::|g;
         s/^lib:://;

@@ -1,4 +1,4 @@
-package Sigma6::Plugin::Github;
+package Sigma6::Plugin::EmberJS;
 use Moose;
 use namespace::autoclean;
 
@@ -8,9 +8,7 @@ extends qw(Sigma6::Plugin);
 with qw(Sigma6::Plugin::API::BuildData);
 
 sub build_data {
-    my ( $self, $data ) = @_;
-    return unless $data->{payload};
-    return { 'Git.target' => $data->{payload}{repository}{url}, };
+    $_[1]->{target} ||= delete $_[1]->{'builds[target]'};
 }
 
 __PACKAGE__->meta->make_immutable;

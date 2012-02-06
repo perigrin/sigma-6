@@ -8,6 +8,6 @@ use Sigma6::Config::GitLike;
 
 my $c = Sigma6::Config::GitLike->new();
 $c->load( $ENV{PWD} );
-my $app = sub { Sigma6->new( config => $c )->run_psgi(@_) };
+my $app = Sigma6::Web->new( config => $c )->as_psgi;
 
 __END__

@@ -3,7 +3,6 @@ use strict;
 use Plack::Test;
 
 use Test::More;
-use Test::HTML::Differences;
 use Test::TempDir qw(tempfile tempdir);
 
 use HTTP::Request::Common;
@@ -83,40 +82,16 @@ my %config = (
 );
 
 my $c = Sigma6::Config::Simple->new( config => \%config );
-
-my $app = sub { Sigma6->new( config => $c )->run_psgi(@_) };
-
-my %page = (
-    '/' => q{
-        <html>                                                              
-          <head>                                                            
-            <title>Sigma6</title>                                           
-          </head>                                                           
-          <body>                                                            
-            <h1>Sigma6 Builds</h1>                                          
-            <p>No Builds Yet</p>                                            
-            <form action="/" method="POST">                                 
-              <select id="some_name" name="some_name" onchange="" size="1"> 
-                <option value="Git">Git</option>                            
-              </select>                                                     
-              <input type="text" value="target"></input>                    
-              <input type="submit"></input>                                 
-            </form>                                                         
-          </body>                                                           
-        </html>
-}
-);
+my $app = Sigma6->new( config => $c )->as_psgi;
 
 test_psgi $app => sub {
     my $cb = shift;
     my $res = $cb->( GET "/", 'Accept' => 'text/html' );
     is $res->code, 200, 'got a 200 for /';
-    eq_or_diff_html( $res->content, $page{'/'}, 'HTML looks okay' );
 
     {
         $res = $cb->(
-            POST '/',
-            [ 'Git.target' => 'git@github.com:perigrin/Exportare.git', ]
+            POST '/', [ 'target' => 'git@github.com:perigrin/Exportare.git', ]
         );
         is $res->code, 202, 'got a 202';
 
@@ -138,7 +113,7 @@ test_psgi $app => sub {
     {
         my $res = $cb->(
             POST '/',
-            [ 'Git.target' => 'git@github.com:perigrin/json-any.git', ]
+            [ 'target' => 'git@github.com:perigrin/json-any.git', ]
         );
         is $res->code, 202, 'got a 202';
 

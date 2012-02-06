@@ -18,7 +18,7 @@ has web_app => (
     is      => 'ro',
     lazy    => 1,
     builder => '_build_web_app',
-    handles => ['run_psgi'],
+    handles => ['as_psgi'],
 );
 
 sub _build_web_app { Sigma6::Web->new( config => shift->config ) }

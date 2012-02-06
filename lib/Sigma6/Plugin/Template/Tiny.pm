@@ -3,7 +3,7 @@ use Moose;
 use namespace::autoclean;
 use Template::Tiny;
 use Try::Tiny;
-use File::ShareDir qw(class_file);
+use File::ShareDir qw(dist_file);
 
 extends qw(Sigma6::Plugin);
 with qw(Sigma6::Plugin::API::RenderHTML);
@@ -16,7 +16,7 @@ has build_template => (
 );
 
 sub _build_template {
-    my $file = try { class_file( __PACKAGE__, 'root/src/build.tt' ) }
+    my $file = try { dist_file( 'Sigma6', 'root/src/build.tt' ) }
     catch {'share/root/src/build.tt'};
     return do { local $/; open my $fh, '<', $file; <$fh>};
 }
@@ -29,7 +29,7 @@ has all_builds_template => (
 );
 
 sub _all_builds_template {
-    my $file = try { class_file( __PACKAGE__, 'root/src/all_builds.tt' ) }
+    my $file = try { dist_file( 'Sigma6', 'root/src/all_builds.tt' ) }
     catch {'share/root/src/all_builds.tt'};
     return do { local $/; open my $fh, '<', $file; <$fh>};
 }

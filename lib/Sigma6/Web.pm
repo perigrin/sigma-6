@@ -9,6 +9,7 @@ use Plack::Request;
 use Plack::Response;
 use Try::Tiny;
 use HTTP::Negotiate;
+use Plack::Builder;
 
 has config => (
     does     => 'Sigma6::Config',
@@ -17,19 +18,35 @@ has config => (
     handles  => 'Sigma6::Config',
 );
 
-sub run_psgi {
-    return shift->as_psgi(shift)->(@_)->finalize;
-}
+has assets_directory => (
+    isa     => 'Str',
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {
+        try { dist_dir('Sigma6') } catch {'share'};
+    },
+);
 
 sub as_psgi {
-    my ( $self, $env ) = @_;
-    return sub {
-        my $r = Plack::Request->new($env);
-        if ( my $method = $self->can( $env->{REQUEST_METHOD} ) ) {
-            return $self->$method($r);
-        }
-        return $self->HTTP_501;
-    };
+    my $self = shift;
+    return builder {
+        enable 'Plack::Middleware::Static' => (
+            path => qr{^/static/},
+            root => $self->assets_directory . '/root/',
+        );
+        my $app = sub {
+            my $env = shift;
+            my $r   = Plack::Request->new($env);
+            my $res;
+            if ( my $method = $self->can( $env->{REQUEST_METHOD} ) ) {
+                $res = $self->$method($r);
+            }
+            else {
+                $res = $self->HTTP_501;
+            }
+            $res->finalize;
+        };
+    }
 }
 
 sub HTTP_501 {
@@ -49,22 +66,25 @@ sub HTTP_404 {
 sub POST {
     my ( $self, $r ) = @_;
     my $data       = $r->parameters->as_hashref;
+    $data->{target} ||= delete $data->{'builds[target]'};
     my $build_data = try {
         $self->first_from_plugin_with(
-            '-BuildData' => sub { shift->build_data($data) } );
+            '-BuildData' => sub { shift->build_data($data); } );
     }
-    catch {$data};
+    catch {
+        warn $_;
+    };
+    confess "No Build Data" unless $build_data;
     my $build = $self->first_from_plugin_with( '-StartBuild',
         sub { $_[0]->start_build($build_data) } );
 
     my $res = Plack::Response->new();
-    $res->redirect("/$build->{id}", 202);
+    $res->redirect( "/$build->{id}", 202 );
     return $res;
 }
 
 sub GET {
     my ( $self, $r ) = @_;
-    my $build_id = ( split m|/|, $r->path_info )[-1];
     my $renderer = HTTP::Negotiate::choose(
         [   [ '-RenderJSON', 1.000, 'application/json', ],
             [ '-RenderHTML', 1.000, 'text/html', ],
@@ -72,6 +92,7 @@ sub GET {
         $r->headers
     );
 
+    my $build_id = ( split m|/|, $r->path_info )[-1];
     my $builds
         = $build_id
         ? [
