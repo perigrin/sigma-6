@@ -7,6 +7,9 @@ use namespace::autoclean;
 
 use Git::Wrapper;
 use Try::Tiny;
+use Sigma6::Model::Build;
+
+sub Build() {'Sigma6::Model::Build'}
 
 extends qw(Sigma6::Plugin);
 
@@ -20,18 +23,22 @@ sub build_data {
     my ( $self, $data ) = @_;
     confess 'Not Valid Build Data'
         unless Scalar::Util::reftype $data eq 'HASH';
-    return $data if $data->{'Git.target'};
+
     my $target = $data->{target} || return;
-    return { 'Git.target' => $target } if $target =~ m/^git@|\.git$/;
-    return;
+
+    return unless $target =~ m/^git@|\.git/;
+
+    return Build->new(
+        target => $target,
+        type   => 'git'
+    );
+
 }
 
 sub target {
     my ( $self, $build ) = @_;
-    confess 'Not Valid Build Data'
-        unless Scalar::Util::reftype $build eq 'HASH';
-    confess 'No Git.target key' unless exists $build->{'Git.target'};
-    return $build->{'Git.target'};
+    confess unless blessed($build);
+    return $build->target;
 }
 
 sub workspace {

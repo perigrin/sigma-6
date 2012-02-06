@@ -10,8 +10,10 @@ body {
         margin: auto; 
         background-color: white; 
         border: 1px solid black; 
-        min-height: 600px; 
+        height: 100%;
         padding: 1em;
 }
 
-
+li { list-style: none; margin: 0; }
+ul { margin: 0 auto;
+     padding: 0;}

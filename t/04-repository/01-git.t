@@ -4,6 +4,8 @@ use strict;
 use Test::More;
 use Test::TempDir qw(tempdir);
 use Sigma6::Config::Simple;
+use Sigma6::Model::Build;
+sub Build() { 'Sigma6::Model::Build' }
 
 my $workspace = tempdir();
 
@@ -28,24 +30,26 @@ ok my @repo = $c->plugins_with('-Repository'), 'got the repository';
 is @repo, 1, 'only one repo configured';
 isa_ok $repo[0], 'Sigma6::Plugin::Git';
 
-my $build = { 'Git.target' => 'git@github.com:perigrin/Exportare.git', };
+my $build = Build->new(
+    'target' => 'git@github.com:perigrin/Exportare.git',
+    type     => 'git'
+);
 
 $c->first_from_plugin_with(
     '-SetupRepository' => sub { shift->setup_repository($build) } );
 
 ok -d $workspace, 'workspace exists';
-my $dir = $workspace. '/'. $repo[0]->humanish($build->{'Git.target'});
+my $dir = $workspace . '/' . $repo[0]->humanish( $build->target );
 ok -d $dir, 'workdir exists too';
 my $sha1 = substr(
     (   Git::Wrapper->new($dir)
-            ->_cmd( 'ls-remote', $build->{'Git.target'}, 'HEAD' )
+            ->_cmd( 'ls-remote', $build->target, 'HEAD' )
     )[0],
     0, 7
 );
 
 is $c->first_from_plugin_with(
-    '-Repository' => sub { $_[0]->commit_id($build); }
-    ),
+    '-Repository' => sub { $_[0]->commit_id($build); } ),
     $sha1, 'got a commit_id';
 
 my ($desc) = Git::Wrapper->new($dir)->_cmd( 'log', '--oneline', '-1' );

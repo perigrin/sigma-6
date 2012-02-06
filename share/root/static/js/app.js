@@ -4,12 +4,9 @@ App = Ember.Application.create();
 App.Build = Ember.Resource.extend({
     url: '/builds',
     name: 'builds',
-    properties: ['target'],
+    properties: ['target', 'id', 'status', 'type', 'description'],
 
-    validate: function() {
-
-    },
-
+    validate: function() { }
 });
 
 App.buildsController= Ember.ResourceController.create({ type: App.Build });

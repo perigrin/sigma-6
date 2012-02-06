@@ -4,6 +4,7 @@ use Test::More;
 use Test::Deep;
 use Test::TempDir qw(tempfile);
 use Sigma6::Config::Simple;
+use Sigma6::Model::Build;
 
 {
 
@@ -26,11 +27,13 @@ use Sigma6::Config::Simple;
     package Sigma6::Plugin::Test::Repository;
     use Moose;
     extends qw(Sigma6::Plugin);
-    with qw(Sigma6::Plugin::API::Repository);
-
+    with qw(
+    Sigma6::Plugin::API::BuildData
+    Sigma6::Plugin::API::Repository
+    );
     my $id = 1;
     sub commit_id { $id++ }
-
+    sub build_data { Sigma6::Model::Build->new(@_) }
     sub commit_description  {''}
     sub commit_status       {''}
     sub repository          {''}

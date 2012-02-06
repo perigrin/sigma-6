@@ -26,19 +26,29 @@ sub check_all_builds {
 sub check_build {
     my ( $self, $build_id ) = @_;
     my $build = $self->get_build($build_id);
-    $build->{status} = $self->first_from_plugin_with(
-        '-CheckSmoker' => sub { $_[0]->check_smoker($build) } );
+    $build->status(
+        $self->first_from_plugin_with(
+            '-CheckSmoker' => sub { $_[0]->check_smoker($build) }
+        )
+    );
     $self->_set_build( $build_id => $build );
     return $build;
 }
 
 sub start_build {
     my ( $self, $build ) = @_;
-    $build->{id} = $self->first_from_plugin_with(
-        '-Repository' => sub { $_[0]->commit_id($build) } );
+    $build = $self->first_from_plugin_with('-BuildData' => sub { $_[0]->build_data($build) }) unless blessed($build);
+    $build->id(
+        $self->first_from_plugin_with(
+            '-Repository' => sub { $_[0]->commit_id($build) }
+        )
+    );
 
-    $build->{description} = $self->first_from_plugin_with(
-        '-Repository' => sub { $_[0]->commit_description($build) } );
+    $build->description(
+        $self->first_from_plugin_with(
+            '-Repository' => sub { $_[0]->commit_description($build) }
+        )
+    );
 
     $self->_set_build( $build->{id} => $build );
 
