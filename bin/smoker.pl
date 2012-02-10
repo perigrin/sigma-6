@@ -24,7 +24,7 @@ Sigma6 ... like CIJoe but with 100% more Awesome
 
 =head1 SYNOPSIS
 
-    build --target git@github.com:perigrin/sigma-6.git --dir /tmp/foo --cmd 'dzil smoke'
+    bin/smoker.pl --config sigma6.ini
 
 =head1 DESCRIPTION
 

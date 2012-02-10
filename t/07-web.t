@@ -68,6 +68,7 @@ my ( $fh, $file ) = tempfile();
 my %config = (
     'Build::Manager' => {},
     'Template::Tiny' => {},
+    'Logger'         => { config => 'logger.conf' },
     'JSON'           => {},
     'Test::Queue'    => {},
     'TestSmoker'     => {
@@ -112,8 +113,7 @@ test_psgi $app => sub {
 
     {
         my $res = $cb->(
-            POST '/',
-            [ 'target' => 'git@github.com:perigrin/json-any.git', ]
+            POST '/', [ 'target' => 'git@github.com:perigrin/json-any.git', ]
         );
         is $res->code, 202, 'got a 202';
 

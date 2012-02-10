@@ -65,16 +65,18 @@ sub check_smoker {
 sub start_smoker {
     my $self = shift;
     my $cmd  = $self->smoker_command;
-    confess 'No smoker_command' unless $cmd;
+    $self->die('No smoker_command') unless $cmd;
     if ( my $pid = fork ) {
+        $self->warn("forked smoker as $pid");
         return $pid;
     }
     elsif ( defined $pid ) {
-        exec($cmd);
+        $self->warn("starting smoker `$cmd` as $pid");
+        exec('bin/smoker.pl', '--config sigma6.ini') or $self->die("Could not start `$cmd`: $!");
         exit;
     }
     else {
-        confess "Could not fork: $!";
+        $self->die("Could not fork: $!");
     }
 }
 
@@ -86,7 +88,7 @@ sub run_smoke {
     my $deps_file  = $self->deps_file;
     my $build_file = $self->build_file;
 
-    for my $builder ( $self->plugins_with('-Smoker') ) {
+    for my $builder ( $self->plugins_with('-SmokeEngine') ) {
         my $deps_command  = $builder->deps_command;
         my $build_command = $builder->build_command;
         system 'mkdir .sigma6' unless -e '.sigma6';

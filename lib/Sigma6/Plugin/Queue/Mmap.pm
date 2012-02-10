@@ -7,7 +7,6 @@ use namespace::autoclean;
 extends qw(Sigma6::Plugin);
 
 use Queue::Mmap;
-use JSON::Any;
 
 has [qw(file size record_size mode)] => (
     is       => 'ro',
@@ -37,13 +36,20 @@ sub _build_queue {
 
 around push_build => sub {
     my ( $next, $self, $data ) = splice @_, 0, 3;
-    $self->$next( JSON::Any->new( allow_blessed => 1 )->encode($data) );
+    $self->warn("Queue adding build");
+    $self->log(debug => "Queue data". $data->dump);
+    my $json = $data->freeze;
+    $self->log(debug => "Queue json $json");
+    $self->$next($json);
 };
 
 around fetch_build => sub {
     my ( $next, $self ) = splice @_, 0, 2;
+    $self->log(notice => "Queue fetching build");
     my $data = $self->$next(@_);
-    JSON::Any->new( allow_blessed => 1 )->decode($data);
+    return unless defined $data && $data ne 'null';
+    $self->log(notice => "Queue Got JSON: $data");
+    Sigma6::Model::Build->thaw($data);
 };
 
 with qw(Sigma6::Plugin::API::Queue);

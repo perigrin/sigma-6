@@ -37,6 +37,7 @@ sub check_build {
 
 sub start_build {
     my ( $self, $build ) = @_;
+    $self->warn('BuildManager Starting Build');
     $build = $self->first_from_plugin_with('-BuildData' => sub { $_[0]->build_data($build) }) unless blessed($build);
     $build->id(
         $self->first_from_plugin_with(

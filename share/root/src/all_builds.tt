@@ -25,13 +25,12 @@
         </script>
         <script type="text/x-handlebars" data-template-name="show-template">
             <li class="data">
-                {{build.target}}
+                <a href="{{build.id}}">{{build.target}}</a>
                 {{#if isEditing}}
                         {{view App.EditBuildView}}
                 {{/if}}
                 <span class="commands">
                     {{#unless isEditing}}
-                         <a href="#" {{action "showEdit"}}>Edit</a>
                          <a href="#" {{action "destroyRecord"}}>Remove</a>
                     {{/unless}}
                 </span>

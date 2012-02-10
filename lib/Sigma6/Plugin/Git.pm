@@ -37,7 +37,7 @@ sub build_data {
 
 sub target {
     my ( $self, $build ) = @_;
-    confess unless blessed($build);
+    $self->die("Unblessed build: $build") unless blessed($build);
     return $build->target;
 }
 

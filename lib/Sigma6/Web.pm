@@ -31,20 +31,23 @@ sub as_psgi {
     my $self = shift;
     return builder {
         enable 'Plack::Middleware::Static' => (
-            path => qr{^/static/},
+            path => qr{^/static/|.ico$},
             root => $self->assets_directory . '/root/',
         );
+
+        enable '+Sigma6::Web::Middleware::Logger' => (    #
+            config => $self->config,
+        );
+
         my $app = sub {
             my $env = shift;
-            my $r   = Plack::Request->new($env);
-            my $res;
-            if ( my $method = $self->can( $env->{REQUEST_METHOD} ) ) {
-                $res = $self->$method($r);
-            }
-            else {
-                $res = $self->HTTP_501;
-            }
-            $res->finalize;
+
+            my $r      = Plack::Request->new($env);
+            my $method = $self->can( $env->{REQUEST_METHOD} );
+
+            return $self->HTTP_501->finalize unless $method;
+
+            return $self->$method($r)->finalize;
         };
     }
 }
@@ -65,20 +68,22 @@ sub HTTP_404 {
 
 sub POST {
     my ( $self, $r ) = @_;
-    my $data       = $r->parameters->as_hashref;
+    my $data = $r->parameters->as_hashref;
     $data->{target} ||= delete $data->{'builds[target]'};
     my $build_data = try {
         $self->first_from_plugin_with(
             '-BuildData' => sub { shift->build_data($data); } );
     }
     catch {
-        warn $_;
+        $r->logger->( { level => 'warn', message => $_ } );
     };
-    confess "No Build Data" unless $build_data;
+    $r->logger->( { level => 'die', message => 'No Build Data' } )
+        unless $build_data;
     my $build = $self->first_from_plugin_with( '-StartBuild',
         sub { $_[0]->start_build($build_data) } );
 
     my $res = Plack::Response->new();
+    $r->logger->( { level => 'notice', message => "202 /$build->{id}" } );
     $res->redirect( "/$build->{id}", 202 );
     return $res;
 }
@@ -93,6 +98,9 @@ sub GET {
     );
 
     my $build_id = ( split m|/|, $r->path_info )[-1];
+    $r->logger->(
+        { level => 'warn', message => "found build_id: $build_id" } )
+        if $build_id;
     my $builds
         = $build_id
         ? [

@@ -12,41 +12,58 @@ has config => (
 );
 
 has build_data => (
+    isa       => 'Ref',
     is        => 'ro',
     clearer   => 'clear_build_data',
     predicate => 'has_build_data',
     lazy      => 1,
     default   => sub {
-        shift->first_from_plugin_with(
+        my $self = shift;
+        my $data = $self->first_from_plugin_with(
             '-DequeueBuild' => sub { $_[0]->fetch_build } );
+        $self->log( debug => "Data: $data" );
+        return $data;
     }
 );
 
+sub log {
+    my ( $self, $level, $message ) = @_;
+    for ( $self->plugins_with('-Logger') ) {
+        $_->$level($message);
+    }
+}
+
 sub setup_repository {
     my ($self) = @_;
-    $_->setup_repository( $self->build_data )
-        for $self->plugins_with('-SetupRepository');
+    $self->log( notice => 'Setting up repository' );
+    for ( $self->plugins_with('-SetupRepository') ) {
+        $_->setup_repository( $self->build_data );
+    }
 }
 
 sub setup_workspace {
     my ($self) = @_;
+    $self->log( notice => 'Setting up workspace' );
     $_->setup_workspace( $self->build_data )
         for $self->plugins_with('-SetupWorkspace');
 }
 
 sub setup_smoker {
     my ($self) = @_;
+    $self->log( notice => 'Setting up smoker' );
     $_->setup_smoker( $self->build_data )
         for $self->plugins_with('-SetupSmoker');
 }
 
 sub run_smoker {
     my ($self) = @_;
+    $self->log( notice => 'Running smoker' );
     $_->run_smoke( $self->build_data ) for $self->plugins_with('-RunSmoker');
 }
 
 sub record_results {
     my ($self) = @_;
+    $self->log( notice => 'Recording results' );
     for my $smoker ( $self->plugins_with('-CheckSmoker') ) {
         for my $logger ( $self->plugins_with('-RecordResults') ) {
             my $build   = $self->build_data;
@@ -58,18 +75,21 @@ sub record_results {
 
 sub teardown_smoker {
     my ($self) = @_;
+    $self->log( notice => 'Tearing down smoker' );
     $_->teardown_smoker( $self->build_data )
         for $self->plugins_with('-TeardownSmoker');
 }
 
 sub teardown_workspace {
     my ($self) = @_;
+    $self->log( notice => 'Tearing down workspace' );
     $_->teardown_workspace( $self->build_data )
         for $self->plugins_with('-TeardownWorkspace');
 }
 
 sub teardown_repository {
     my ($self) = @_;
+    $self->log( notice => 'Tearing down repository' );
     $_->setup_repository( $self->build_data )
         for $self->plugins_with('-TeardownRepository');
 }

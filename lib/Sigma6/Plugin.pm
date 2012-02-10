@@ -11,9 +11,24 @@ has config => (
     handles  => 'Sigma6::Config',
 );
 
-sub name { 
+sub name {
     my ($name) = shift->meta->name =~ m/::(\w+)$/;
     return $name;
+}
+
+sub log {
+        my ($self, $level, $message) = @_;
+        for ($self->plugins_with('-Logger')) {
+                $_->$level($message);
+        }
+}
+
+sub warn {
+    shift->log(warn => @_);
+}
+
+sub die {
+    shift->log(die => @_);
 }
 
 __PACKAGE__->meta->make_immutable;
