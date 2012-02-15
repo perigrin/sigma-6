@@ -85,7 +85,7 @@ can_ok $manager, qw(start_build check_build check_all_builds);
         $build, 'build data is stored properly';
 
     is_deeply $c->first_from_plugin_with(
-        '-CheckBuild' => sub { $_[0]->check_build( $build->{id} ) }
+        '-CheckBuild' => sub { $_[0]->check_build( $build ) }
         ),
         $build, 'CheckBuild looks right';
 }

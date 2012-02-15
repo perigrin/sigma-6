@@ -26,8 +26,8 @@ sub teardown_workspace {
 }
 
 sub record_results {
-    ::is_deeply $_[2], $_[0]->build,   'record_results got build';
-    ::is_deeply $_[1], $_[0]->results, 'record_results got pass';
+    ::is_deeply $_[1], $_[0]->build,   'record_results got build';
+    ::is_deeply $_[2], $_[0]->results, 'record_results got pass';
 }
 sub run_smoke { ::is_deeply $_[1], shift->build, 'run_smoke got build'; }
 

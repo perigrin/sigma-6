@@ -68,7 +68,7 @@ sub record_results {
         for my $logger ( $self->plugins_with('-RecordResults') ) {
             my $build   = $self->build_data;
             my $results = $smoker->check_smoker( $self->build_data );
-            $logger->record_results( $results, $build );
+            $logger->record_results( $build, $results );
         }
     }
 }

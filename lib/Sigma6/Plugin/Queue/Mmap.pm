@@ -37,9 +37,7 @@ sub _build_queue {
 around push_build => sub {
     my ( $next, $self, $data ) = splice @_, 0, 3;
     $self->warn("Queue adding build");
-    $self->log(debug => "Queue data". $data->dump);
     my $json = $data->freeze;
-    $self->log(debug => "Queue json $json");
     $self->$next($json);
 };
 

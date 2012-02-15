@@ -4,7 +4,7 @@ use Test::More;
 use Test::Deep;
 use Test::TempDir qw(tempfile);
 use Sigma6::Config::Simple;
-
+use Sigma6::Model::Build;
 my ( $fh, $file ) = tempfile();
 ok my $c = Sigma6::Config::Simple->new(
     'Queue::Mmap' => {
@@ -22,7 +22,7 @@ my $q = shift @plugins;
 isa_ok $q, 'Sigma6::Plugin::Queue::Mmap';
 ok $q->does('Sigma6::Plugin::API::Queue'), 'does Sigma6::Plugin::API::Queue';
 
-my $build = { 'Git.target' => 'git@github.com:perigrin/Exportare.git' };
+my $build = Sigma6::Model::Build->new({ 'Git.target' => 'git@github.com:perigrin/Exportare.git' });
 
 ok $q->push_build($build), 'pushed a build';
 is_deeply( $q->fetch_build, $build, 'got back the build' );

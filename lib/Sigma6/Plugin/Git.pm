@@ -99,10 +99,10 @@ sub teardown_repository {
 }
 
 sub record_results {
-    my ( $self, $plugin, $build ) = @_;
-    return if $plugin == $self;
-    $self->repository($build)->notes( '--ref=sigma6 add -fm',
-        $plugin->build_status($build), 'HEAD' );
+    my ( $self, $build, $results ) = @_;
+    $self->log('debug' => "git notes --ref=sigma6 add -fm '$results' HEAD");
+    $self->repository($build)
+        ->notes( '--ref=sigma6 add -fm', "'$results'", 'HEAD' );
 }
 
 __PACKAGE__->meta->make_immutable;

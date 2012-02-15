@@ -9,11 +9,11 @@ use Test::Fatal;
 
 use Sigma6::Smoker;
 use Sigma6::Config::Simple;
-
+use Sigma6::Model::Build;
 my $c = Sigma6::Config::Simple->new(
     'Test::Mockup' => {
         workspace => tempdir(),
-        build     => { target => 'foo' },
+        build     => Sigma6::Model::Build->new({ target => 'foo' }),
         results   => ['pass'],
     },
 );
