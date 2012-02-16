@@ -6,13 +6,16 @@ use JSON::Any;
 extends qw(Sigma6::Plugin);
 
 with qw(Sigma6::Plugin::API::RenderJSON);
+use DDP;
 
-sub render_build {
-    JSON::Any->new( allow_blessed => 1 )->encode( $_[2] );
-}
-
-sub render_all_builds {
-    JSON::Any->new( allow_blessed => 1 )->encode( $_[2] );
+sub render {
+    my ( $self, $res, $data ) = @_;
+    $res->content_type('application/json');
+    return JSON::Any->new(
+        convert_blessed => 1,
+        utf8            => 1,
+        pretty          => 1,
+    )->encode($data);
 }
 
 1;

@@ -46,7 +46,6 @@ sub as_psgi {
             my $method = $self->can( $env->{REQUEST_METHOD} );
 
             return $self->HTTP_501->finalize unless $method;
-
             return $self->$method($r)->finalize;
         };
     }
@@ -88,34 +87,49 @@ sub POST {
     return $res;
 }
 
-sub GET {
+sub get_build {
+    my ( $self, $r, $build_id ) = @_;
+    $r->logger->(
+        {   level   => 'warn',
+            message => "found build_id: $build_id"
+        }
+    );
+    my $build = $self->first_from_plugin_with(
+        '-CheckBuild' => sub { $_[0]->get_build($build_id) } );
+    return $self->render( $r, $build );
+}
+
+sub get_all_builds {
     my ( $self, $r ) = @_;
+    my @builds
+        = map { $_->check_all_builds } $self->plugins_with('-CheckBuild');
+    return $self->render( $r, \@builds );
+}
+
+sub render {
+    my ( $self, $r, $builds ) = @_;
     my $renderer = HTTP::Negotiate::choose(
         [   [ '-RenderJSON', 1.000, 'application/json', ],
             [ '-RenderHTML', 1.000, 'text/html', ],
         ],
         $r->headers
     );
-
-    my $build_id = ( split m|/|, $r->path_info )[-1];
-    $r->logger->(
-        { level => 'warn', message => "found build_id: $build_id" } )
-        if $build_id;
-    my $builds
-        = $build_id
-        ? [
-        $self->first_from_plugin_with(
-            '-CheckBuild' => sub { $_[0]->get_build($build_id) }
-        )
-        ]
-        : [ map { $_->check_all_builds } $self->plugins_with('-CheckBuild') ];
-
-    my $output = $self->first_from_plugin_with(
-        $renderer => sub { $_[0]->render_all_builds( $r, $builds ) } );
-
     my $res = Plack::Response->new(200);
+    
+    my $output = $self->first_from_plugin_with(
+        $renderer => sub { $_[0]->render( $res, $builds ) } );
     $res->body($output);
     return $res;
+}
+
+sub GET {
+    my ( $self, $r ) = @_;
+
+    my $build_id = ( split m|/|, $r->path_info )[-1];
+    undef $build_id if defined $build_id && $build_id eq 'builds';
+
+    return $self->get_build( $r, $build_id ) if $build_id;
+    return $self->get_all_builds($r);
 }
 
 1;

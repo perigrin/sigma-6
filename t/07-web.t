@@ -28,19 +28,10 @@ use DDP;
         ::pass 'start_smoker';
         my $smoker = Sigma6::Smoker->new( config => shift->config );
         $smoker->setup_workspace;
-
-        #        $smoker->setup_repository;
         $smoker->setup_smoker;
         $smoker->run_smoker;
-
-        #        $smoker->record_results;
         $smoker->teardown_smoker;
-
-        #       $smoker->teardown_repository;
         $smoker->teardown_workspace;
-
-        #       $self->clear_build_data;
-
     }
 }
 
@@ -54,13 +45,6 @@ use DDP;
     my @builds;
     sub push_build { ::ok push( @builds, $_[1] ), 'got a build' }
     sub fetch_build { ::pass('fetch_build'); shift @builds }
-}
-{
-
-    package Sigma6::Plugin::TestHub;
-    use Moose;
-    extends qw(Sigma6::Plugin);
-    with qw(Sigma6::Plugin::API::BuildData);
 }
 
 my ( $fh, $file ) = tempfile();
@@ -96,8 +80,6 @@ test_psgi $app => sub {
         );
         is $res->code, 202, 'got a 202';
 
-        # ok $res->is_redirect, 'got back a redirect';
-
         ok my $location = $res->header('Location'), 'got location header';
         $res = $cb->( GET $location );
         is $res->code, 200, "got 200 for $location";
@@ -117,11 +99,10 @@ test_psgi $app => sub {
         );
         is $res->code, 202, 'got a 202';
 
-        # ok $res->is_redirect, 'got back a redirect';
-
         ok my $location = $res->header('Location'), 'got location header';
         $res = $cb->( GET $location );
         is $res->code, 200, "got 200 for $location";
+        diag $res->dump;
     }
 
     {

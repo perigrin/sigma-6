@@ -36,18 +36,19 @@ sub _build_queue {
 
 around push_build => sub {
     my ( $next, $self, $data ) = splice @_, 0, 3;
-    $self->warn("Queue adding build");
-    my $json = $data->freeze;
-    $self->$next($json);
+    $self->log( trace => "Queue adding build" );
+    $self->$next( $data->{id} );
 };
 
 around fetch_build => sub {
     my ( $next, $self ) = splice @_, 0, 2;
-    $self->log(notice => "Queue fetching build");
-    my $data = $self->$next(@_);
-    return unless defined $data && $data ne 'null';
-    $self->log(notice => "Queue Got JSON: $data");
-    Sigma6::Model::Build->thaw($data);
+    $self->log( trace => "Queue fetching build" );
+    my $build_id = $self->$next(@_);
+    return unless defined $build_id;
+    $self->log( debug => "Queue Got Id: $build_id" );
+    my $build = $self->first_from_plugin_with(
+        '-CheckBuild' => sub { $_[0]->get_build($build_id) } );
+    return $build;
 };
 
 with qw(Sigma6::Plugin::API::Queue);

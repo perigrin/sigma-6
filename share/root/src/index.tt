@@ -10,31 +10,42 @@
         <script src="/static/js/plugins.js"></script>    
         <script src="/static/js/app.js"></script>
         <script type="text/x-handlebars" data-template-name="list-template">
-                <ul>
-                {{#each builds}}
-                    <li>{{view App.ShowBuildView buildBinding="this"}}</li>
-                {{/each}}
+        <div class="commands">
+            <a href="#" {{action "refreshListing"}}>Refresh Listing</a>
+            <a href="#" {{action "showNew"}}>Add Build</a>
+        </div>
+        <div>
+            <ul>
                 {{#if isNewVisible}}
                     <li class="new">{{view App.NewBuildView}}</li>
                 {{/if}}
             </ul>
-            <div class="commands">
-                <a href="#" {{action "showNew"}}>New Build</a>
-                <a href="#" {{action "refreshListing"}}>Refresh Listing</a>
-            </div>
+            <ul>
+                {{#each builds}}
+                    <li class="build">{{view App.ShowBuildView buildBinding="this"}}</li>
+                {{/each}}
+            </ul>
+        </div>
         </script>
         <script type="text/x-handlebars" data-template-name="show-template">
-            <li class="data">
-                <a href="{{build.id}}">{{build.target}}</a>
-                {{#if isEditing}}
-                        {{view App.EditBuildView}}
+                <a href="#" {{action "toggleFullView"}}>{{build.revision}}@{{build.timestamp}}</a>{{build.description}}
+                {{#if fullView}}
+                        {{view App.fullBuildView buildBinding="build"}}
                 {{/if}}
                 <span class="commands">
                     {{#unless isEditing}}
-                         <a href="#" {{action "destroyRecord"}}>Remove</a>
+                         <a href="#" {{action "rebuildBuild"}}>Rebuild</a>
+                         <a href="#" {{action "destroyBuild"}}>Clear</a>
                     {{/unless}}
                 </span>
-            </li>
+        </script>
+        <script type="text/x-handlebars" data-template-name="full-build-template">
+            {{#with build}}
+                <p>{{target}}</p>
+                <div style="overflow: auto; height: 100ex">
+                <pre style="font-size: 10px">{{status}}</pre>
+                </div>
+            {{/with}}
         </script>
         <script type="text/x-handlebars" data-template-name="edit-template">
             {{#with build}}

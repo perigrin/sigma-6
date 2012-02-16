@@ -16,7 +16,6 @@ extends qw(Sigma6::Plugin);
 with qw(
     Sigma6::Plugin::API::BuildData
     Sigma6::Plugin::API::Repository
-    Sigma6::Plugin::API::RecordResults
 );
 
 sub build_data {
@@ -37,6 +36,7 @@ sub build_data {
 
 sub target {
     my ( $self, $build ) = @_;
+    $self->log( trace => "Git build target $build->{target}" );
     $self->die("Unblessed build: $build") unless blessed($build);
     return $build->target;
 }
@@ -59,48 +59,64 @@ sub humanish {
 
 sub repository {
     my ( $self, $build ) = @_;
+    $self->log( trace => 'Git repository' );
     my $target = $self->target($build);
     my $dir    = $self->humanish($target);
-    my $git    = Git::Wrapper->new( $self->workspace . '/' . $dir );
+    $self->log( trace => "Git building Git::Wrapper for $dir" );
+    my $git = Git::Wrapper->new( $self->workspace . '/' . $dir );
     $git->clone( $target => $git->dir ) unless -e $git->dir;
     return $git;
 }
 
-sub commit_id {
+sub revision {
     my ( $self, $build ) = @_;
+    $self->log( trace => 'Git commit id' );
+    return $build->id if $build->id;
     my $target = $self->target($build);
     my $repo   = $self->repository($build);
     my ($sha1) = $repo->_cmd( 'ls-remote', $target, 'HEAD' );
+    $self->log( trace => "Git commit id $sha1" );
     return substr( $sha1, 0, 7 );
 }
 
-sub commit_status {
+sub revision_status {
     my ( $self, $build ) = @_;
+    $self->log( trace => 'Git commit status' );
     $self->repository($build)->notes( 'show', 'HEAD' ) || '';
 }
 
-sub commit_description {
+sub revision_description {
     my ( $self, $build ) = @_;
+    $self->log( trace => 'Git commit description' );
     my $repo = $self->repository($build);
     my ($desc) = $repo->_cmd( 'log', '--oneline', '-1' );
+    $desc =~ s/^$build->{id}//;
     return $desc;
 }
 
 sub setup_repository {
     my ( $self, $build ) = @_;
+    $self->log( trace => 'Git setup repository' );
     $self->repository($build)->pull( 'origin', 'master' );
     $self->repository($build)->fetch( 'origin', 'refs/notes/*:refs/notes/*' );
 }
 
 sub teardown_repository {
     my ( $self, $build ) = @_;
+    $self->log( trace => 'Git teardown repository' );
     $self->repository($build)->push( 'origin', 'refs/notes/*' );
     $self->repository($build)->clean('-dxf');
 }
 
+sub repository_directory {
+    my ( $self, $build ) = @_;
+    $self->log( trace => 'Git teardown repository' );
+    $self->repository($build)->dir;
+}
+
 sub record_results {
     my ( $self, $build, $results ) = @_;
-    $self->log('debug' => "git notes --ref=sigma6 add -fm '$results' HEAD");
+    $self->log( 'debug' => "git notes --ref=sigma6 add -fm '$results' HEAD" );
     $self->repository($build)
         ->notes( '--ref=sigma6 add -fm', "'$results'", 'HEAD' );
 }

@@ -1,15 +1,19 @@
-
 App = Ember.Application.create();
 
 App.Build = Ember.Resource.extend({
     url: '/builds',
     name: 'builds',
-    properties: ['target', 'id', 'status', 'type', 'description'],
+    properties: ['target', 'id', 'revision', 'type', 'description', 'status', 'timestamp'],
 
-    validate: function() { }
+    validate: function() {},
+    json: Ember.computed(function() {
+        log(this);
+    })
 });
 
-App.buildsController= Ember.ResourceController.create({ type: App.Build });
+App.buildsController = Ember.ResourceController.create({
+    type: App.Build
+});
 
 App.ListBuildsView = Ember.View.extend({
     templateName: 'list-template',
@@ -54,7 +58,7 @@ App.NewBuildView = Ember.View.extend({
 
         build.save()
         .fail(function(e) {
-                log(e);
+            log(e);
             // App.displayError(e);
         })
         .done(function() {
@@ -67,21 +71,29 @@ App.NewBuildView = Ember.View.extend({
 App.ShowBuildView = Ember.View.extend({
     templateName: 'show-template',
     classNames: ['show-build'],
-    tagName: 'tr',
 
     doubleClick: function() {
-        this.showEdit();
+        this.toggleFullView();
     },
 
-    showEdit: function() {
-        this.set('isEditing', true);
+    toggleFullView: function() {
+        if (this.get('fullView')) {
+            this.set('fullView', false);
+        } else {
+            this.set('fullView', true);
+        }
     },
 
-    hideEdit: function() {
-        this.set('isEditing', false);
+    rebuildBuild: function() {
+        var build = this.get("build");
+        var newBuild = App.Build.create({target: build.target});
+                
+        newBuild.save().done(function() {
+            App.buildsController.pushObject(build);
+        });
     },
 
-    destroyRecord: function() {
+    destroyBuild: function() {
         var build = this.get("build");
 
         build.destroy()
@@ -91,6 +103,19 @@ App.ShowBuildView = Ember.View.extend({
     }
 });
 
-Handlebars.registerHelper('submitButton', function(text) {
-  return new Handlebars.SafeString('<button type="submit">' + text + '</button>');
+App.fullBuildView = Ember.View.extend({
+    templateName: 'full-build-template',
+    classNames: ['full-build'],
+    
+})
+
+Handlebars.registerHelper('submitButton',
+function(text) {
+    return new Handlebars.SafeString('<button type="submit">' + text + '</button>');
+});
+
+
+Handlebars.registerHelper('log',
+function(data) {
+    log(data)
 });

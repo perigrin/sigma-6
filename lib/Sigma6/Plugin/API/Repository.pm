@@ -11,9 +11,10 @@ with qw(
 
 requires qw(
     repository
-    commit_id
-    commit_description
-    commit_status
+    revision
+    revision_description
+    revision_status
+    repository_directory
     target
 );
 

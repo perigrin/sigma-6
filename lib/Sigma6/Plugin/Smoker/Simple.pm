@@ -56,7 +56,8 @@ sub _build_build_file {
 }
 
 sub check_smoker {
-    my $self       = shift;
+    my $self = shift;
+    $self->log( trace => 'Smoker::Simple check smoker' );
     my $build_file = $self->build_file;
     return `cat $build_file` if -e $build_file;
     return '[nothing yet]';
@@ -66,13 +67,15 @@ sub start_smoker {
     my $self = shift;
     my $cmd  = $self->smoker_command;
     $self->die('No smoker_command') unless $cmd;
+    $self->log( trace => 'Smoker::Simple starting smoker' );
     if ( my $pid = fork ) {
         $self->warn("forked smoker as $pid");
         return $pid;
     }
     elsif ( defined $pid ) {
         $self->warn("starting smoker `$cmd` as $pid");
-        exec('bin/smoker.pl', '--config sigma6.ini') or $self->die("Could not start `$cmd`: $!");
+        exec( 'bin/smoker.pl', '--config sigma6.ini' )
+            or $self->die("Could not start `$cmd`: $!");
         exit;
     }
     else {
@@ -83,11 +86,19 @@ sub start_smoker {
 sub setup_smoker    { }
 sub teardown_smoker { }
 
+sub repository_directory {
+    my ( $self, $build ) = @_;
+    $self->first_from_plugin_with( '-Repository',
+        sub { shift->repository_directory($build) } );
+}
+
 sub run_smoke {
-    my $self       = shift;
+    my ( $self, $build ) = @_;
     my $deps_file  = $self->deps_file;
     my $build_file = $self->build_file;
 
+    $self->log( trace => 'Smoker::Simple run smoke' );
+    chdir $self->repository_directory($build);
     for my $builder ( $self->plugins_with('-SmokeEngine') ) {
         my $deps_command  = $builder->deps_command;
         my $build_command = $builder->build_command;
@@ -103,6 +114,7 @@ sub teardown_smoke {
 
 sub setup_workspace {
     my ( $self, $build_data ) = @_;
+    $self->log( trace => 'Smoker::Simple setup workspace ' );
     mkdir $self->workspace unless -e $self->workspace;
     chdir $self->workspace;
     $ENV{PERL5LIB} .= ':perl5/lib/perl5';
@@ -110,6 +122,7 @@ sub setup_workspace {
 
 sub teardown_workspace {
     my $self = shift;
+    $self->log( trace => 'Smoker::Simple teardown workspace ' );
     chdir $self->previous_workspace;
 }
 

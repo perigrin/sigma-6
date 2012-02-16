@@ -19,6 +19,7 @@ has logger => (
     lazy    => 1,
     builder => '_build_logger',
     handles => {
+        trace  => 'trace',
         debug  => 'debug',
         notice => 'info',
         warn   => 'warn',

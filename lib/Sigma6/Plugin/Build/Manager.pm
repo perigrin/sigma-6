@@ -5,9 +5,13 @@ use namespace::autoclean;
 
 extends qw(Sigma6::Plugin);
 
-with qw(Sigma6::Plugin::API::BuildManager);
+with qw(
+    Sigma6::Plugin::API::BuildManager
+    Sigma6::Plugin::API::RecordResults
+);
 
 use KiokuX::Model;
+use Sigma6::Model::Build;
 
 has dsn => (
     isa     => 'Str',
@@ -26,65 +30,97 @@ has model => (
         );
     },
     handles => {
-       get_build     => 'lookup',
-        _builds        => 'root_set',
-        _store_build  => 'store',
-        _update_build => 'update',
+        get_build    => 'lookup',
+        builds       => 'root_set',
+        store_build  => 'store',
+        update_build => 'update',
     },
 );
 
-around get_build => sub { 
-        my $next = shift;
-        my $scope = $_[0]->model->new_scope;
-        $next->(@_);
+around get_build => sub {
+    my $next  = shift;
+    my $scope = $_[0]->model->new_scope;
+    $next->(@_);
+};
+
+around builds => sub {
+    my $next  = shift;
+    my $scope = $_[0]->model->new_scope;
+    $next->(@_);
+};
+
+around store_build => sub {
+    my $next  = shift;
+    my $scope = $_[0]->model->new_scope;
+    $next->(@_);
+};
+
+around update_build => sub {
+    my $next  = shift;
+    my $scope = $_[0]->model->new_scope;
+    $next->(@_);
 };
 
 sub check_all_builds {
-    my $self = shift;
+    my $self  = shift;
     my $scope = $self->model->new_scope;
-    return map { $self->check_build($_) } $self->_builds->all;
+    $self->log( trace => 'BuildManager checking all builds' );
+    return map { $self->check_build($_) } $self->builds->all;
 }
 
 sub check_build {
     my ( $self, $build ) = @_;
-    my $scope = $self->model->new_scope;
+    $self->log( trace => 'BuildManager checking build' );
     $build->status(
         $self->first_from_plugin_with(
             '-CheckSmoker' => sub { $_[0]->check_smoker($build) }
         )
     );
-    $self->_update_build( $build );
+    $self->update_build($build);
     return $build;
 }
 
 sub start_build {
-    my ( $self, $build ) = @_;
-    my $scope = $self->model->new_scope;
-    $self->warn('BuildManager Starting Build');
-    $build
-        = $self->first_from_plugin_with(
-        '-BuildData' => sub { $_[0]->build_data($build) } )
-        unless blessed($build);
-    $build->id(
-        $self->first_from_plugin_with(
-            '-Repository' => sub { $_[0]->commit_id($build) }
-        )
+    my ( $self, $stub ) = @_;
+    $self->log( trace => 'BuildManager starting build' );
+
+    $self->log( trace => 'BuildManager setting $build->revision' );
+
+    my $revision = $self->first_from_plugin_with(
+        '-Repository' => sub { $_[0]->revision($stub) } );
+
+    $self->log( trace => 'BuildManager setting $build->description' );
+    my $description = $self->first_from_plugin_with(
+        '-Repository' => sub { $_[0]->revision_description($stub) } );
+
+    my $build = Sigma6::Model::Build->new(
+        type        => $stub->type,
+        target      => $stub->target,
+        revision    => $revision,
+        description => $description,
     );
 
-    $build->description(
-        $self->first_from_plugin_with(
-            '-Repository' => sub { $_[0]->commit_description($build) }
-        )
-    );
-    $self->_store_build( $build->id => $build );
+    $self->log( trace => 'BuildManager storing $build' );
+    $self->store_build( $build->id => $build );
 
+    $self->log( trace => 'BuildManager queueing $build' );
     $self->first_from_plugin_with(
         '-EnqueueBuild' => sub { $_[0]->push_build($build) } );
 
+    $self->log( trace => 'BuildManager starting smoker' );
     $self->first_from_plugin_with(
         '-StartSmoker' => sub { $_[0]->start_smoker() } );
 
     return $build;
+}
+
+sub record_results {
+    my ( $self, $build, $results ) = @_;
+    $self->log( trace => 'BuildManager recording results' );
+    $self->log( debug => $results );
+    $build->status($results);
+    $self->store_build($build);
+    return;
 }
 
 1;
