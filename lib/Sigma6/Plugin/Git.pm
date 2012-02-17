@@ -87,7 +87,8 @@ sub revision_description {
     $self->log( trace => 'Git commit description' );
     my $repo = $self->repository($build);
     my ($desc) = $repo->_cmd( 'log', '--oneline', '-1' );
-    $desc =~ s/^$build->{id}//;
+    my $revision = $self->revision($build);
+    $desc =~ s/^\Q$revision\E//;
     return $desc;
 }
 

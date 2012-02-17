@@ -50,10 +50,10 @@ my $sha1 = substr(
 
 is $c->first_from_plugin_with(
     '-Repository' => sub { $_[0]->revision($build); } ),
-    $sha1, 'got a revision';
+    $sha1, 'got the revision';
 
 my ($desc) = Git::Wrapper->new($dir)->_cmd( 'log', '--oneline', '-1' );
-
+$desc =~ s/^\Q$sha1\E//;
 is $c->first_from_plugin_with(
     '-Repository' => sub { $_[0]->revision_description($build) } ), $desc,
     'got a revision_description';
