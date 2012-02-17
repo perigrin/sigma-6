@@ -7,8 +7,8 @@ use Test::Deep;
 use Sigma6::Config::Simple;
 
 my %config = (
-    'Build::Manager' => {},
-    'JSON' => {},
+    'BuildManager::Kioku' => {},
+    'JSON'                => {},
     'Git'  => { note_command => 'notes --ref=sigma6-test add -fm', },
     'Dzil' => {
         deps_command  => 'cpanm -L perl5 --installdeps Makefile.PL',

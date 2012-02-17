@@ -1,4 +1,4 @@
-package Sigma6::Plugin::Build::Manager;
+package Sigma6::Plugin::BuildManager::Kioku;
 use Moose;
 use namespace::autoclean;
 

@@ -47,11 +47,11 @@ use JSON::Any;
 my ( $fh, $file ) = tempfile();
 
 my %config = (
-    'Build::Manager' => {},
-    'Logger'         => { config => 'logger.conf' },
-    'JSON'           => {},
-    'Test::Queue'    => {},
-    'TestSmoker'     => {
+    'BuildManager::Kioku' => { dsn    => 'dbi:SQLite::memory:' },
+    'Logger'              => { config => 'logger.conf' },
+    'JSON'                => {},
+    'Test::Queue'         => {},
+    'TestSmoker'          => {
         workspace      => tempdir(),
         smoker_command => 'bin/smoker.pl --config etc/sigma6.ini',
     },
@@ -122,7 +122,7 @@ test_psgi $app => sub {
         is $res->code, 200, "got 200 for $location";
         $res = $cb->( DELETE $location);
         is $res->code, 200, "got 200 for DELETE $location";
-        $res = $cb->(GET $location);
+        $res = $cb->( GET $location);
         is $res->code, 404, "got 404 for $location";
     }
 };

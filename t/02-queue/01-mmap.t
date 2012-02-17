@@ -9,8 +9,8 @@ use Sigma6::Model::Build;
 my ( $fh, $file ) = tempfile();
 
 ok my $c = Sigma6::Config::Simple->new(
-    'Build::Manager' => { dsn => 'dbi:SQLite::memory:' },
-    'Queue::Mmap'    => {
+    'BuildManager::Kioku' => { dsn => 'dbi:SQLite::memory:' },
+    'Queue::Mmap'         => {
         file        => $file,
         size        => 10,
         record_size => 20,
@@ -26,7 +26,10 @@ isa_ok $q, 'Sigma6::Plugin::Queue::Mmap';
 ok $q->does('Sigma6::Plugin::API::Queue'), 'does Sigma6::Plugin::API::Queue';
 
 my $build = Sigma6::Model::Build->new(
-    { 'target' => 'git@github.com:perigrin/Exportare.git', revision => 'DEADBEEF' } );
+    {   'target' => 'git@github.com:perigrin/Exportare.git',
+        revision => 'DEADBEEF'
+    }
+);
 
 $c->first_from_plugin_with(
     '-BuildManager' => sub { shift->store_build( $build->id => $build ) } );

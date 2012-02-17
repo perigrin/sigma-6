@@ -59,15 +59,15 @@ use Sigma6::Model::Build;
 my ( $fh, $file ) = tempfile();
 
 my $c = Sigma6::Config::Simple->new(
-    'Build::Manager'   => {},
-    'Test::Repository' => {},
-    'Test::Smoker'     => {},
-    'Test::Queue'      => {},
+    'BuildManager::Kioku' => { dsn => 'dbi:SQLite::memory:' },
+    'Test::Repository'    => {},
+    'Test::Smoker'        => {},
+    'Test::Queue'         => {},
 );
 
 ok my ($manager) = $c->plugins_with('-BuildManager'), 'got Manager';
 
-isa_ok( $manager, 'Sigma6::Plugin::Build::Manager' );
+isa_ok( $manager, 'Sigma6::Plugin::BuildManager::Kioku' );
 
 is( $_, $manager, "CheckBuild is the same" )
     for $c->plugins_with('-CheckBuild');
@@ -80,7 +80,9 @@ can_ok $manager, qw(start_build check_build check_all_builds);
 {
     ok my $build = $manager->start_build(
         Sigma6::Model::Build->new(
-            { 'target' => 'git@github.com:perigrin/Exportare.git', type => 'mock' }
+            {   'target' => 'git@github.com:perigrin/Exportare.git',
+                type     => 'mock'
+            }
         )
         ),
         'added a simple build';
@@ -88,7 +90,8 @@ can_ok $manager, qw(start_build check_build check_all_builds);
         $build, 'build data is stored properly';
 
     is_deeply $c->first_from_plugin_with(
-        '-CheckBuild' => sub { $_[0]->check_build($build) } ),
+        '-CheckBuild' => sub { $_[0]->check_build($build) }
+        ),
         $build, 'CheckBuild looks right';
 }
 {
@@ -96,7 +99,9 @@ can_ok $manager, qw(start_build check_build check_all_builds);
     is @builds, 1, 'got the right number of builds';
 }
 {
-    $manager->start_build( Sigma6::Model::Build->new({ 'target' => 'Moose', type=>'mock' }) );
+    $manager->start_build(
+        Sigma6::Model::Build->new( { 'target' => 'Moose', type => 'mock' } )
+    );
     ok my @builds = $manager->check_all_builds(), 'check all builds works';
     is @builds, 2, 'got the right number of builds';
 }

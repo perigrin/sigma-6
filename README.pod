@@ -5,8 +5,7 @@ CIJoe is a Real American Hero ... Sigma6 continues the battle against Pyth^WCobr
 =head1 SYNOPSIS
 
     > cat sigma6.ini
-    [Build::Manager]
-    [Template::Tiny]
+    [BuildManager::Kioku]
     [JSON]
 
     [Queue::Mmap]
