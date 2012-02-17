@@ -102,7 +102,7 @@ test_psgi $app => sub {
         ok my $location = $res->header('Location'), 'got location header';
         $res = $cb->( GET $location );
         is $res->code, 200, "got 200 for $location";
-        diag $res->dump;
+        #diag $res->dump;
     }
 
     {

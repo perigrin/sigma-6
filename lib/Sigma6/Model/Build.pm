@@ -15,7 +15,7 @@ has [qw(target revision type description)] => (
 
 has status => ( isa => 'Str', is => 'rw', );
 
-has timestamp => ( is => 'ro', default => sub {time} );
+has timestamp => ( is => 'ro', lazy => 1, default => sub {time} );
 
 has id => (
     is      => 'ro',

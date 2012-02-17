@@ -9,8 +9,6 @@ use Git::Wrapper;
 use Try::Tiny;
 use Sigma6::Model::Build;
 
-sub Build() {'Sigma6::Model::Build'}
-
 extends qw(Sigma6::Plugin);
 
 with qw(
@@ -27,7 +25,7 @@ sub build_data {
 
     return unless $target =~ m/^git@|\.git/;
 
-    return Build->new(
+    return Sigma6::Model::Build->new(
         target => $target,
         type   => 'git'
     );
@@ -71,7 +69,7 @@ sub repository {
 sub revision {
     my ( $self, $build ) = @_;
     $self->log( trace => 'Git commit id' );
-    return $build->id if $build->id;
+    return $build->revision if $build->revision;
     my $target = $self->target($build);
     my $repo   = $self->repository($build);
     my ($sha1) = $repo->_cmd( 'ls-remote', $target, 'HEAD' );

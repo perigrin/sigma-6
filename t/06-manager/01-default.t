@@ -28,18 +28,19 @@ use Sigma6::Model::Build;
     use Moose;
     extends qw(Sigma6::Plugin);
     with qw(
-    Sigma6::Plugin::API::BuildData
-    Sigma6::Plugin::API::Repository
+        Sigma6::Plugin::API::BuildData
+        Sigma6::Plugin::API::Repository
     );
     my $id = 1;
-    sub commit_id { $id++ }
-    sub build_data { Sigma6::Model::Build->new(@_) }
-    sub commit_description  {''}
-    sub commit_status       {''}
-    sub repository          {''}
-    sub setup_repository    {''}
-    sub teardown_repository {''}
-    sub target              { }
+    sub revision { $id++ }
+    sub build_data { Sigma6::Model::Build->new( @_, type => 'mock' ) }
+    sub revision_description {''}
+    sub revision_status      {''}
+    sub repository_directory {''}
+    sub repository           {''}
+    sub setup_repository     {''}
+    sub teardown_repository  {''}
+    sub target               { }
 
 }
 
@@ -77,16 +78,17 @@ is( $_, $manager, "StartBuild is the same" )
 can_ok $manager, qw(start_build check_build check_all_builds);
 
 {
-    ok my $build
-        = $manager->start_build(
-        { 'Git.target' => 'git@github.com:perigrin/Exportare.git' } ),
+    ok my $build = $manager->start_build(
+        Sigma6::Model::Build->new(
+            { 'target' => 'git@github.com:perigrin/Exportare.git', type => 'mock' }
+        )
+        ),
         'added a simple build';
     is_deeply $manager->get_build( $build->{id} ),
         $build, 'build data is stored properly';
 
     is_deeply $c->first_from_plugin_with(
-        '-CheckBuild' => sub { $_[0]->check_build( $build ) }
-        ),
+        '-CheckBuild' => sub { $_[0]->check_build($build) } ),
         $build, 'CheckBuild looks right';
 }
 {
@@ -94,7 +96,7 @@ can_ok $manager, qw(start_build check_build check_all_builds);
     is @builds, 1, 'got the right number of builds';
 }
 {
-    $manager->start_build( { 'CPAN.target' => 'Moose' } );
+    $manager->start_build( Sigma6::Model::Build->new({ 'target' => 'Moose', type=>'mock' }) );
     ok my @builds = $manager->check_all_builds(), 'check all builds works';
     is @builds, 2, 'got the right number of builds';
 }

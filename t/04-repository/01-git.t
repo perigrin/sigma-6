@@ -49,14 +49,14 @@ my $sha1 = substr(
 );
 
 is $c->first_from_plugin_with(
-    '-Repository' => sub { $_[0]->commit_id($build); } ),
-    $sha1, 'got a commit_id';
+    '-Repository' => sub { $_[0]->revision($build); } ),
+    $sha1, 'got a revision';
 
 my ($desc) = Git::Wrapper->new($dir)->_cmd( 'log', '--oneline', '-1' );
 
 is $c->first_from_plugin_with(
-    '-Repository' => sub { $_[0]->commit_description($build) } ), $desc,
-    'got a commit_description';
+    '-Repository' => sub { $_[0]->revision_description($build) } ), $desc,
+    'got a revision_description';
 
 done_testing();
 

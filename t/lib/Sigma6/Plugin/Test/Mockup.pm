@@ -40,13 +40,14 @@ sub check_smoker {
     $_[0]->results;
 }
 
-sub smoker_command     {...}
-sub start_smoker       {...}
-sub commit_description {...}
-sub commit_id          {...}
-sub commit_status      {...}
-sub repository         {...}
-sub target             {...}
+sub smoker_command       {...}
+sub start_smoker         {...}
+sub revision_description {...}
+sub revision             {...}
+sub revision_status      {...}
+sub repository           {...}
+sub target               {...}
+sub repository_directory {...}
 
 sub teardown_smoker {
     ::is_deeply $_[1], shift->build, 'teardown_smoker got build';
