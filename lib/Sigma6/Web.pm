@@ -38,8 +38,11 @@ sub as_psgi {
         enable '+Sigma6::Web::Middleware::Logger' => (    #
             config => $self->config,
         );
-
-        my $app = sub {
+        mount '/' => Plack::App::File->new(
+            file => $self->assets_directory . '/root/static/index.html',
+            content_type => 'text/html',
+        );
+        mount '/builds' => sub {
             my $env = shift;
 
             my $r      = Plack::Request->new($env);
@@ -115,7 +118,7 @@ sub render {
         $r->headers
     );
     my $res = Plack::Response->new(200);
-    
+
     my $output = $self->first_from_plugin_with(
         $renderer => sub { $_[0]->render( $res, $builds ) } );
     $res->body($output);

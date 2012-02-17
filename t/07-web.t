@@ -51,7 +51,6 @@ my ( $fh, $file ) = tempfile();
 
 my %config = (
     'Build::Manager' => {},
-    'Template::Tiny' => {},
     'Logger'         => { config => 'logger.conf' },
     'JSON'           => {},
     'Test::Queue'    => {},
@@ -76,7 +75,7 @@ test_psgi $app => sub {
 
     {
         $res = $cb->(
-            POST '/', [ 'target' => 'git@github.com:perigrin/Exportare.git', ]
+            POST '/builds', [ 'target' => 'git@github.com:perigrin/Exportare.git', ]
         );
         is $res->code, 202, 'got a 202';
 
@@ -85,7 +84,7 @@ test_psgi $app => sub {
         is $res->code, 200, "got 200 for $location";
     }
     {
-        my $res = $cb->( GET "/", );
+        my $res = $cb->( GET "/builds", );
         is $res->code, 200, 'got 200 for /';
         my @builds
             = JSON::Any->new( allow_blessed => 1 )->decode( $res->content );
@@ -95,7 +94,7 @@ test_psgi $app => sub {
 
     {
         my $res = $cb->(
-            POST '/', [ 'target' => 'git@github.com:perigrin/json-any.git', ]
+            POST '/builds', [ 'target' => 'git@github.com:perigrin/json-any.git', ]
         );
         is $res->code, 202, 'got a 202';
 
@@ -106,7 +105,7 @@ test_psgi $app => sub {
     }
 
     {
-        my $res = $cb->( GET "/", );
+        my $res = $cb->( GET "/builds", );
         is $res->code, 200, 'got 200 for /';
         my $builds
             = JSON::Any->new( allow_blessed => 1 )->decode( $res->content );

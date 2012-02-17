@@ -12,7 +12,8 @@ App.Build = Ember.Resource.extend({
 });
 
 App.buildsController = Ember.ResourceController.create({
-    type: App.Build
+    type: App.Build,
+    url: '/builds'
 });
 
 App.ListBuildsView = Ember.View.extend({

@@ -8,11 +8,7 @@ use Sigma6::Config::Simple;
 
 my %config = (
     'Build::Manager' => {},
-    'Template::Tiny' => {},
-    'Smoker::Simple' => {
-        workspace      => '/tmp/sigma6/test',
-        smoker_command => 'bin/smoker.pl --config etc/sigma6.ini',
-    },
+    'JSON' => {},
     'Git'  => { note_command => 'notes --ref=sigma6-test add -fm', },
     'Dzil' => {
         deps_command  => 'cpanm -L perl5 --installdeps Makefile.PL',
@@ -27,10 +23,6 @@ is_deeply(
     Sigma6::Config::Simple->new(%config) => $c,
     '->new(%config) works'
 );
-is_deeply(
-    Sigma6::Config::Simple->new( \%config ) => $c,
-    '->new(\%config) works'
-);
 
 can_ok( $c, 'first_from_plugin_with' );
 
@@ -43,7 +35,7 @@ $c->first_from_plugin_with(
 );
 
 can_ok( $c, 'plugins_with' );
-my @plugins = $c->plugins_with('-RenderHTML');
+my @plugins = $c->plugins_with('-RenderJSON');
 is( @plugins, 1, 'Got the expected number of plugins' );
 
 done_testing();
