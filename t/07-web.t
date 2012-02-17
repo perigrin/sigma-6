@@ -11,7 +11,6 @@ use Sigma6;
 
 use JSON::Any;
 
-use DDP;
 
 {
 
@@ -20,7 +19,6 @@ use DDP;
     extends qw(Sigma6::Plugin::Smoker::Simple);
 
     use Sigma6::Smoker;
-    use DDP;
 
     sub run_smoke { ::pass 'run smoke' }
 
