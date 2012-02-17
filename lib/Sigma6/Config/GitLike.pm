@@ -273,8 +273,6 @@ sub parse_content {
     }
 }
 
-use DDP;
-
 sub get_regexp {
     my $self = shift;
 

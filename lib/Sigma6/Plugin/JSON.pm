@@ -6,7 +6,6 @@ use JSON::Any;
 extends qw(Sigma6::Plugin);
 
 with qw(Sigma6::Plugin::API::RenderJSON);
-use DDP;
 
 sub render {
     my ( $self, $res, $data ) = @_;
