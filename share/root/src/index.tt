@@ -11,8 +11,8 @@
         <script src="/static/js/app.js"></script>
         <script type="text/x-handlebars" data-template-name="list-template">
         <div class="commands">
-            <a href="#" {{action "refreshListing"}}>Refresh Listing</a>
-            <a href="#" {{action "showNew"}}>Add Build</a>
+            <a class="button" href="#" {{action "refreshListing"}}>Refresh</a>
+            <a class="button" href="#" {{action "showNew"}}>New Build</a>
         </div>
         <div>
             <ul>
@@ -28,24 +28,20 @@
         </div>
         </script>
         <script type="text/x-handlebars" data-template-name="show-template">
-                <a href="#" {{action "toggleFullView"}}>{{build.revision}}@{{build.timestamp}}</a>{{build.description}}
+        <span class="commands">
+                 <a class="button" href="#" {{action "rebuildBuild"}}>Rebuild</a>
+                 <a class="button" href="#" {{action "destroyBuild"}}>Clear</a>
+        </span>
+                <a href="#" {{action "toggleFullView"}}>{{build.timestamp}} {{build.target}}</a>
                 {{#if fullView}}
                         {{view App.fullBuildView buildBinding="build"}}
                 {{/if}}
-                <span class="commands">
-                    {{#unless isEditing}}
-                         <a href="#" {{action "rebuildBuild"}}>Rebuild</a>
-                         <a href="#" {{action "destroyBuild"}}>Clear</a>
-                    {{/unless}}
-                </span>
         </script>
         <script type="text/x-handlebars" data-template-name="full-build-template">
-            {{#with build}}
-                <p>{{target}}</p>
-                <div style="overflow: auto; height: 100ex">
-                <pre style="font-size: 10px">{{status}}</pre>
+                <p>{{build.target}}</p>
+                <div style="overflow: auto; max-height: 100ex">
+                <pre style="font-size: 10px">{{build.status}}</pre>
                 </div>
-            {{/with}}
         </script>
         <script type="text/x-handlebars" data-template-name="edit-template">
             {{#with build}}

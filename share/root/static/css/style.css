@@ -1,19 +1,45 @@
-html { 
-        background-color: #ccc; 
-        height: 100%; 
-        width: 100%; 
-        font-size: 14px;
-        font-family: Helvetica, san-serif;
+html {
+    background-color: #ccc;
+    height: 100%;
+    width: 100%;
+    font-size: 14px;
+    font-family: Helvetica, san-serif;
 }
-body { 
-        width: 80%; 
-        margin: auto; 
-        background-color: white; 
-        border: 1px solid black; 
-        min-height: 100%;
-        padding: 1em;
+body {
+    width: 80%;
+    margin: auto;
+    background-color: white;
+    border: 1px solid black;
+    min-height: 100%;
+    padding: 1em;
 }
 
-li { list-style: none; margin: 0; }
-ul { margin: 0 auto;
-     padding: 0;}
+li {
+    list-style: none;
+    margin: 1ex 0;
+    clear: both
+}
+ul {
+    margin: 0 auto;
+    padding: 0;
+}
+
+a.button {
+    background-color: silver;
+    display: inline-block;
+    width: 9ex;
+    text-align: center;
+    margin: 3px;
+    border: 1px solid black;
+    font-variant: small-caps;
+    border-radius: 0.5;
+    text-decoration: none;
+    padding: 1px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    -moz-box-shadow: shadow 0 1px 2px rgba(0,0,0,.2);
+    box-shadow: 0 1px 2px rgba(0,0,0,.2);
+    color: black;
+    background: -webkit-gradient(linear, left top, left bottom, from(#CCC), to(#999));
+    background: -moz-linear-gradient(top, #CCC, #999);
+    filter: progid:DXImageTransform.Microsoft.gradient(styleartColorstr='#ccc', endColorstr='#999');
+}
