@@ -49,7 +49,7 @@ sub get_section_config {
     my ( $self, $key ) = @_;
     my $cfg = $self->get_regexp( key => qr/^$key/ );
     return {} unless $cfg;
-    for ( keys $cfg ) {
+    for ( keys %$cfg ) {
         ( my $k = $_ ) =~ s/^$key\.//;
         $cfg->{$k} = delete $cfg->{$_};
     }

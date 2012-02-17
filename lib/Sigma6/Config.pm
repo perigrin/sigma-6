@@ -1,5 +1,4 @@
 package Sigma6::Config;
-use 5.10.1;
 use Moose::Role;
 use namespace::autoclean;
 
@@ -19,8 +18,6 @@ has plugins => (
 );
 
 sub _build_plugins { [] }
-
-use DDP;
 
 around add_plugins => sub {
     my ( $next, $self, @input ) = @_;
@@ -44,7 +41,6 @@ around add_plugins => sub {
         grep { $load_class->($_) }
         grep { $seen_plugin->($_) } map { ucfirst $_ } @input;
 
-    #    warn p @output;
     $self->$next(@output);
 };
 

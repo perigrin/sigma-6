@@ -1,5 +1,4 @@
 package Sigma6::Plugin::Git;
-use v5.10.1;
 use Moose;
 use namespace::autoclean;
 
