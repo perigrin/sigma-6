@@ -43,11 +43,9 @@ sub as_psgi {
             content_type => 'text/html',
         );
         mount '/builds' => sub {
-            my $env = shift;
-
+            my $env    = shift;
             my $r      = Plack::Request->new($env);
             my $method = $self->can( $env->{REQUEST_METHOD} );
-
             return $self->HTTP_501->finalize unless $method;
             return $self->$method($r)->finalize;
         };
@@ -85,8 +83,9 @@ sub POST {
         sub { $_[0]->start_build($build_data) } );
 
     my $res = Plack::Response->new();
-    $r->logger->( { level => 'notice', message => "202 /$build->{id}" } );
-    $res->redirect( "/$build->{id}", 202 );
+    $r->logger->(
+        { level => 'notice', message => "202 /builds/$build->{id}" } );
+    $res->redirect( "/builds/$build->{id}", 202 );
     return $res;
 }
 
@@ -99,6 +98,7 @@ sub get_build {
     );
     my $build = $self->first_from_plugin_with(
         '-CheckBuild' => sub { $_[0]->get_build($build_id) } );
+    return $self->HTTP_404 unless $build;
     return $self->render( $r, $build );
 }
 
@@ -106,6 +106,7 @@ sub get_all_builds {
     my ( $self, $r ) = @_;
     my @builds
         = map { $_->check_all_builds } $self->plugins_with('-CheckBuild');
+    return $self->HTTP_404 unless @builds;
     return $self->render( $r, \@builds );
 }
 
@@ -129,11 +130,19 @@ sub GET {
     my ( $self, $r ) = @_;
 
     my $build_id = ( split m|/|, $r->path_info )[-1];
-    undef $build_id if defined $build_id && $build_id eq 'builds';
 
     return $self->get_build( $r, $build_id ) if $build_id;
     return $self->get_all_builds($r);
 }
 
+sub DELETE {
+    my ( $self, $r ) = @_;
+    my $build_id = ( split m|/|, $r->path_info )[-1];
+    my $build = $self->first_from_plugin_with(
+        '-CheckBuild' => sub { $_[0]->get_build($build_id) } );
+    $self->first_from_plugin_with(
+        '-BuildManager' => sub { $_[0]->clear_build($build) } );
+    return Plack::Response->new(200);
+}
 1;
 __END__

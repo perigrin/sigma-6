@@ -33,32 +33,17 @@ has model => (
         builds       => 'root_set',
         store_build  => 'store',
         update_build => 'update',
+        clear_build  => 'delete',
     },
 );
 
-around get_build => sub {
-    my $next  = shift;
-    my $scope = $_[0]->model->new_scope;
-    $next->(@_);
-};
-
-around builds => sub {
-    my $next  = shift;
-    my $scope = $_[0]->model->new_scope;
-    $next->(@_);
-};
-
-around store_build => sub {
-    my $next  = shift;
-    my $scope = $_[0]->model->new_scope;
-    $next->(@_);
-};
-
-around update_build => sub {
-    my $next  = shift;
-    my $scope = $_[0]->model->new_scope;
-    $next->(@_);
-};
+for my $method (qw(get_build builds store_build update_build clear_build)) {
+    around $method => sub {
+        my $next  = shift;
+        my $scope = $_[0]->model->new_scope;
+        $next->(@_);
+    };
+}
 
 sub check_all_builds {
     my $self  = shift;

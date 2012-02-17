@@ -5,12 +5,11 @@ use Plack::Test;
 use Test::More;
 use Test::TempDir qw(tempfile tempdir);
 
-use HTTP::Request::Common;
+use HTTP::Request::Common qw(GET POST DELETE);
 use Sigma6::Config::Simple;
 use Sigma6;
 
 use JSON::Any;
-
 
 {
 
@@ -73,7 +72,8 @@ test_psgi $app => sub {
 
     {
         $res = $cb->(
-            POST '/builds', [ 'target' => 'git@github.com:perigrin/Exportare.git', ]
+            POST '/builds',
+            [ 'target' => 'git@github.com:perigrin/Exportare.git', ]
         );
         is $res->code, 202, 'got a 202';
 
@@ -92,14 +92,15 @@ test_psgi $app => sub {
 
     {
         my $res = $cb->(
-            POST '/builds', [ 'target' => 'git@github.com:perigrin/json-any.git', ]
+            POST '/builds',
+            [ 'target' => 'git@github.com:perigrin/json-any.git', ]
         );
         is $res->code, 202, 'got a 202';
 
         ok my $location = $res->header('Location'), 'got location header';
         $res = $cb->( GET $location );
         is $res->code, 200, "got 200 for $location";
-        #diag $res->dump;
+
     }
 
     {
@@ -108,6 +109,21 @@ test_psgi $app => sub {
         my $builds
             = JSON::Any->new( allow_blessed => 1 )->decode( $res->content );
         is @$builds, 2, 'got the expected number of builds';
+    }
+    {
+        my $res = $cb->(
+            POST '/builds',
+            [ 'target' => 'git@github.com:perigrin/json-any.git', ]
+        );
+        is $res->code, 202, 'got a 202';
+
+        ok my $location = $res->header('Location'), 'got location header';
+        $res = $cb->( GET $location );
+        is $res->code, 200, "got 200 for $location";
+        $res = $cb->( DELETE $location);
+        is $res->code, 200, "got 200 for DELETE $location";
+        $res = $cb->(GET $location);
+        is $res->code, 404, "got 404 for $location";
     }
 };
 
