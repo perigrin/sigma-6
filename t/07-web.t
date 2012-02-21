@@ -48,7 +48,7 @@ my ( $fh, $file ) = tempfile();
 
 my %config = (
     'BuildManager::Kioku' => { dsn    => 'dbi:SQLite::memory:' },
-    'Logger'              => { config => 'logger.conf' },
+    'Logger::Log4perl'    => { config => 'logger.conf' },
     'JSON'                => {},
     'Test::Queue'         => {},
     'TestSmoker'          => {
