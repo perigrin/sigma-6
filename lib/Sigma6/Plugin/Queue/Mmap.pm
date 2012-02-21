@@ -47,7 +47,7 @@ around fetch_build => sub {
     return unless defined $build_id;
     $self->log( debug => "Queue Got Id: $build_id" );
     my $build = $self->first_from_plugin_with(
-        '-CheckBuild' => sub { $_[0]->get_build($build_id) } );
+        '-BuildManager' => sub { $_[0]->get_build($build_id) } );
     return $build;
 };
 
