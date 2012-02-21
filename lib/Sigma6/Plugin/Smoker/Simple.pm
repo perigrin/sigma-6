@@ -58,8 +58,13 @@ sub _build_build_file {
 sub check_smoker {
     my $self = shift;
     $self->log( trace => 'Smoker::Simple check smoker' );
-    my $build_file = $self->build_file;
-    return `cat $build_file` if -e $build_file;
+
+    my $output;
+    for my $file ( $self->deps_file, $self->build_file ) {
+        next unless -e $file;
+        $output .= `cat $file`;
+    }
+    return $output if $output;
     return '[nothing yet]';
 }
 
@@ -96,21 +101,26 @@ sub run_smoke {
     my ( $self, $build ) = @_;
     my $deps_file  = $self->deps_file;
     my $build_file = $self->build_file;
-
+    
     $self->log( trace => 'Smoker::Simple run smoke' );
     chdir $self->repository_directory($build);
-    for my $builder ( $self->plugins_with('-SmokeEngine') ) {
-        my $deps_command  = $builder->deps_command;
-        my $build_command = $builder->build_command;
-        system 'mkdir .sigma6' unless -e '.sigma6';
-        system "$deps_command &> $deps_file";
-        system "$build_command &> $build_file";
-    }
+    $self->first_from_plugin_with(
+        '-SmokeEngine' => sub {
+            $_[0]->smoke_build(
+                $build => sub {
+                    my ( $self, $build ) = @_;
+                    my $deps_command  = $self->deps_command;
+                    my $build_command = $self->build_command;
+                    system 'mkdir .sigma6' unless -e '.sigma6';
+                    system "$deps_command &> $deps_file";
+                    system "$build_command &> $build_file";
+                },
+            );
+        }
+    );
 }
 
-sub teardown_smoke {
-
-}
+sub teardown_smoke { }
 
 sub setup_workspace {
     my ( $self, $build_data ) = @_;
