@@ -62,17 +62,18 @@ sub repository {
     $self->log( trace => "Git building Git::Wrapper for $dir" );
     my $git = Git::Wrapper->new( $self->workspace . '/' . $dir );
     $git->clone( $target => $git->dir ) unless -e $git->dir;
+    $git->fetch();
     return $git;
 }
 
 sub revision {
     my ( $self, $build ) = @_;
-    $self->log( trace => 'Git commit id' );
+    $self->log( trace => 'Git revision id' );
     return $build->revision if $build->revision;
     my $target = $self->target($build);
     my $repo   = $self->repository($build);
     my ($sha1) = $repo->_cmd( 'ls-remote', $target, 'HEAD' );
-    $self->log( trace => "Git commit id $sha1" );
+    $self->log( trace => "Git revision id $sha1" );
     return substr( $sha1, 0, 7 );
 }
 
