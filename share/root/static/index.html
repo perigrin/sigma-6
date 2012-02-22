@@ -12,7 +12,7 @@
         <script type="text/x-handlebars" data-template-name="list-template">
         <div class="commands">
             <a class="button" href="#" {{action "refreshListing"}}>Refresh</a>
-            <a class="button" href="#" {{action "showNew"}}>New Build</a>
+            <a class="button" href="#" {{action "showNew"}}>Add Build</a>
         </div>
         <div>
             <ul>
@@ -45,7 +45,7 @@
         </script>
         <script type="text/x-handlebars" data-template-name="edit-template">
             {{#with build}}
-                {{view Ember.TextField valueBinding="target"  placeholder="Target"}}
+                {{view Ember.TextField valueBinding="target"  placeholder="Target" class="repositoryUrl"}}
                 {{#if id}}
                     {{submitButton "Update"}}
                 {{else}}

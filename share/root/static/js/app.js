@@ -13,7 +13,21 @@ App.Build = Ember.Resource.extend({
 
 App.buildsController = Ember.ResourceController.create({
     type: App.Build,
-    url: '/builds'
+    url: '/builds',
+
+    findAll: function() {
+      var self = this;
+      return jQuery.ajax({
+        url: this._url(),
+        dataType: 'json',
+        type: 'GET'
+      }).done( function(json) {
+        json.reverse();
+        self.set("content", []);
+        self.loadAll(json);
+      });
+    },
+
 });
 
 App.ListBuildsView = Ember.View.extend({

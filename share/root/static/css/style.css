@@ -43,3 +43,8 @@ a.button {
     background: -moz-linear-gradient(top, #CCC, #999);
     filter: progid:DXImageTransform.Microsoft.gradient(styleartColorstr='#ccc', endColorstr='#999');
 }
+
+.repositoryUrl { 
+    border: 1px solid black;
+    width: 80ex;
+}
