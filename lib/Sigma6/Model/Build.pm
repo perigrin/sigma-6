@@ -9,7 +9,7 @@ use MooseX::Storage;
 
 with Storage( format => 'JSON' );
 
-has [qw(target revision type description)] => (
+has [qw(target revision type description directory)] => (
     is  => 'ro',
     isa => 'Str',
 );

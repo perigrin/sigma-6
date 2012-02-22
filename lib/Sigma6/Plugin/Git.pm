@@ -25,8 +25,9 @@ sub build_data {
     return unless $target =~ m/^git@|\.git/;
 
     return Sigma6::Model::Build->new(
-        target => $target,
-        type   => 'git'
+        'target'    => $target,
+        'directory' => $self->_build_directory($target),
+        'type'      => 'git',
     );
 
 }
@@ -54,13 +55,19 @@ sub humanish {
     return $target;
 }
 
+sub _build_directory {
+    my ( $self, $target ) = @_;
+    my $dir = $self->humanish($target);
+    $self->workspace . '/' . $dir;
+}
+
 sub repository {
     my ( $self, $build ) = @_;
     $self->log( trace => 'Git repository' );
     my $target = $self->target($build);
-    my $dir    = $self->humanish($target);
+    my $dir    = $self->_build_directory( $build->target );
     $self->log( trace => "Git building Git::Wrapper for $dir" );
-    my $git = Git::Wrapper->new( $self->workspace . '/' . $dir );
+    my $git = Git::Wrapper->new($dir);
     $git->clone( $target => $git->dir ) unless -e $git->dir;
     $git->fetch();
     return $git;
@@ -109,7 +116,7 @@ sub teardown_repository {
 
 sub repository_directory {
     my ( $self, $build ) = @_;
-    $self->log( trace => 'Git teardown repository' );
+    $self->log( trace => 'Git repository directory' );
     $self->repository($build)->dir;
 }
 

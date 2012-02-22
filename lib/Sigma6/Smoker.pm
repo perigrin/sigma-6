@@ -36,7 +36,7 @@ sub log {
 
 sub setup_repository {
     my ($self) = @_;
-    $self->log( trace => 'Smoker setting up repository' );
+    $self->log( trace => 'Smoker setting up repository ' . $self->build_data->target );
     for ( $self->plugins_with('-SetupRepository') ) {
         $_->setup_repository( $self->build_data );
     }
@@ -51,20 +51,20 @@ sub setup_workspace {
 
 sub setup_smoker {
     my ($self) = @_;
-    $self->log( trace => 'Smoker setting up smoker' );
+    $self->log( trace => 'Smoker setting up smoker ' . $self->build_data->target );
     $_->setup_smoker( $self->build_data )
         for $self->plugins_with('-SetupSmoker');
 }
 
 sub run_smoker {
     my ($self) = @_;
-    $self->log( trace => 'Smoker running smoker' );
+    $self->log( trace => 'Smoker running smoker ' . $self->build_data->target );
     $_->run_smoke( $self->build_data ) for $self->plugins_with('-RunSmoker');
 }
 
 sub record_results {
     my ($self) = @_;
-    $self->log( trace => 'Smoker recording results' );
+    $self->log( trace => 'Smoker recording results ' . $self->build_data->target );
     for my $smoker ( $self->plugins_with('-CheckSmoker') ) {
         for my $logger ( $self->plugins_with('-RecordResults') ) {
             my $build   = $self->build_data;
@@ -76,28 +76,28 @@ sub record_results {
 
 sub teardown_smoker {
     my ($self) = @_;
-    $self->log( trace => 'Smoker tearing down smoker' );
+    $self->log( trace => 'Smoker tearing down smoker ' . $self->build_data->target );
     $_->teardown_smoker( $self->build_data )
         for $self->plugins_with('-TeardownSmoker');
 }
 
 sub teardown_workspace {
     my ($self) = @_;
-    $self->log( trace => 'Smoker tearing down workspace' );
+    $self->log( trace => 'Smoker tearing down workspace ' . $self->build_data->target );
     $_->teardown_workspace( $self->build_data )
         for $self->plugins_with('-TeardownWorkspace');
 }
 
 sub teardown_repository {
     my ($self) = @_;
-    $self->log( trace => 'Smoker tearing down repository' );
+    $self->log( trace => 'Smoker tearing down repository ' . $self->build_data->target );
     $_->setup_repository( $self->build_data )
         for $self->plugins_with('-TeardownRepository');
 }
 
 sub run {
     my $self = shift;
-    $self->log(trace => "Smoker starting run");
+    $self->log( trace => 'Smoker starting run ' . $self->build_data->target );
     $self->setup_workspace;
     $self->setup_repository;
     $self->setup_smoker;
@@ -107,7 +107,7 @@ sub run {
     $self->teardown_repository;
     $self->teardown_workspace;
     $self->clear_build_data;
-    $self->log(trace => "Smoker ending run");
+    $self->log( trace => 'Smoker ending run ' . $self->build_data->target );
 }
 
 __PACKAGE__->meta->make_immutable;

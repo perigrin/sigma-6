@@ -31,36 +31,25 @@ with qw(
     Sigma6::Plugin::API::Workspace
 );
 
-has deps_file => (
-    isa     => 'Str',
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_deps_file',
-);
-
-sub _build_deps_file {
-    my $dir = shift->workspace;
+sub deps_file {
+    my ( $self, $build ) = @_;
+    my $dir = $self->repository_directory($build);
     return "$dir/.sigma6/deps.output";
 }
 
-has build_file => (
-    isa     => 'Str',
-    is      => 'ro',
-    lazy    => 1,
-    builder => '_build_build_file',
-);
-
-sub _build_build_file {
-    my $dir = shift->workspace;
+sub build_file {
+    my ( $self, $build ) = @_;
+    my $dir = $self->repository_directory($build);
     "$dir/.sigma6/deps.output";
 }
 
 sub check_smoker {
-    my $self = shift;
+    my ( $self, $build ) = @_;
     $self->log( trace => 'Smoker::Simple check smoker' );
 
     my $output;
-    for my $file ( $self->deps_file, $self->build_file ) {
+    for my $file ( $self->deps_file($build), $self->build_file($build) ) {
+        $self->log( trace => "Smoker::Simple checking smoker $file" );
         next unless -e $file;
         $output .= `cat $file`;
     }
@@ -74,11 +63,11 @@ sub start_smoker {
     $self->die('No smoker_command') unless $cmd;
     $self->log( trace => 'Smoker::Simple starting smoker' );
     if ( my $pid = fork ) {
-        $self->warn("forked smoker as $pid");
+        $self->warn("Smoker::Simple forked smoker as $pid");
         return $pid;
     }
     elsif ( defined $pid ) {
-        $self->warn("starting smoker `$cmd` as $pid");
+        $self->warn("Smoker::Simple starting smoker `$cmd` as $pid");
         exec( 'bin/smoker.pl', '--config sigma6.ini' )
             or $self->die("Could not start `$cmd`: $!");
         exit;
@@ -99,18 +88,19 @@ sub repository_directory {
 
 sub run_smoke {
     my ( $self, $build ) = @_;
-    my $deps_file  = $self->deps_file;
-    my $build_file = $self->build_file;
-    
     $self->log( trace => 'Smoker::Simple run smoke' );
-    chdir $self->repository_directory($build);
+
+    my $deps_file  = $self->deps_file($build);
+    my $build_file = $self->build_file($build);
+    $self->log( trace => 'Smoke::Simple changing to ' . $build->directory );
+    chdir $build->directory;
     $self->first_from_plugin_with(
         '-SmokeEngine' => sub {
             $_[0]->smoke_build(
                 $build => sub {
                     my ( $self, $build ) = @_;
-                    my $deps_command  = $self->deps_command;
-                    my $build_command = $self->build_command;
+                    my $deps_command  = $self->deps_command($build);
+                    my $build_command = $self->build_command($build);
                     system 'mkdir .sigma6' unless -e '.sigma6';
                     system "$deps_command &> $deps_file";
                     system "$build_command &> $build_file";
@@ -139,8 +129,6 @@ sub teardown_workspace {
 __PACKAGE__->meta->make_immutable;
 1;
 __END__
-<<<<<<< HEAD
-=======
 
 =head1 SYNOPSIS
 
