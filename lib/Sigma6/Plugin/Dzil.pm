@@ -6,14 +6,19 @@ use namespace::autoclean;
 
 extends qw(Sigma6::Plugin);
 
-has [
-    qw(
-        deps_command
-        build_command
-        )
-] => ( isa => 'Str', is => 'ro', required => 1, );
+has [qw( deps_command build_command )] => (
+    isa      => 'Str',
+    is       => 'ro',
+    required => 1,
+);
 
 with qw(Sigma6::Plugin::API::SmokeEngine);
+
+sub smoke_build {
+    my ( $self, $build, $smoke ) = @_;
+    return unless -e 'dist.ini';
+    $self->$smoke($build);
+}
 
 __PACKAGE__->meta->make_immutable;
 1;

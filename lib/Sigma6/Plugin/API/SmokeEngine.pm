@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 # ABSTRACT: BuildSystem Plugin API
 
-requires qw(deps_command build_command);
+requires qw(deps_command build_command smoke_build);
 
 1;
 __END__
