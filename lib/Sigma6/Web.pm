@@ -28,19 +28,22 @@ has assets_directory => (
 
 sub as_psgi {
     my $self = shift;
+    
     return builder {
+        enable '+Sigma6::Web::Middleware::Logger' => (    #
+            config => $self->config,
+        );
+
         enable 'Plack::Middleware::Static' => (
             path => qr{^/static/|.ico$},
             root => $self->assets_directory . '/root/',
         );
 
-        enable '+Sigma6::Web::Middleware::Logger' => (    #
-            config => $self->config,
-        );
         mount '/' => Plack::App::File->new(
             file => $self->assets_directory . '/root/static/index.html',
             content_type => 'text/html',
         );
+
         mount '/builds' => sub {
             my $env    = shift;
             my $r      = Plack::Request->new($env);
@@ -113,7 +116,8 @@ sub render {
     my ( $self, $r, $builds ) = @_;
     my $renderer = HTTP::Negotiate::choose(
         [   [ '-RenderJSON', 1.000, 'application/json', ],
-            [ '-RenderHTML', 1.000, 'text/html', ],
+
+            #            [ '-RenderHTML', 1.000, 'text/html', ],
         ],
         $r->headers
     );
