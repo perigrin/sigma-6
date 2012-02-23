@@ -4,7 +4,7 @@ use namespace::autoclean;
 
 # ABSTRACT: API for BuildData Plugins
 
-sub build_data { return $_[1]  }
+requires 'build_data';
 
 1;
 __END__
