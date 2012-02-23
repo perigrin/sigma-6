@@ -22,7 +22,7 @@ has build_data => (
         my $data = $self->first_from_plugin_with(
             '-DequeueBuild' => sub { $_[0]->fetch_build } );
         $self->log( debug => "Data: $data" );
-        $self->log( die => "No Data!") unless $data;
+        $self->log( die => "No Data!" ) unless $data;
         return $data;
     }
 );
@@ -34,19 +34,19 @@ sub log {
     }
 }
 
+sub setup_workspace {
+    my ($self) = @_;
+    $self->log( trace => 'Smoker setting up workspace' );
+    $_->setup_workspace( $self->build_data )
+        for $self->plugins_with('-SetupWorkspace');
+}
+
 sub setup_repository {
     my ($self) = @_;
     $self->log( trace => 'Smoker setting up repository ' . $self->build_data->target );
     for ( $self->plugins_with('-SetupRepository') ) {
         $_->setup_repository( $self->build_data );
     }
-}
-
-sub setup_workspace {
-    my ($self) = @_;
-    $self->log( trace => 'Smoker setting up workspace' );
-    $_->setup_workspace( $self->build_data )
-        for $self->plugins_with('-SetupWorkspace');
 }
 
 sub setup_smoker {
@@ -107,7 +107,6 @@ sub run {
     $self->teardown_repository;
     $self->teardown_workspace;
     $self->log( trace => 'Smoker ending run ' . $self->build_data->target );
-    $self->log( trace => 'Smoker clearing build data ' . $self->build_data->target );
     $self->clear_build_data;
 }
 
