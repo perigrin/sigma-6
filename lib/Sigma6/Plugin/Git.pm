@@ -123,3 +123,52 @@ sub record_results {
 __PACKAGE__->meta->make_immutable;
 1;
 __END__
+
+=head1 NAME
+
+Sigma6::Plugin::Git
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION 
+
+=head1 ROLES COMPOSED
+
+=over 4
+
+=item L<Sigma6::Plugin::API::BuildData>
+
+=item L<Sigma6::Plugin::API::Repository>
+
+=back 
+
+=head1 METHODS
+
+=over 4
+
+=item build_data
+
+=item target 
+
+=item workspace 
+
+=item humanish 
+
+=item repository 
+
+=item revision
+
+=item revision_status
+
+=item revision_description
+
+=item setup_repository
+
+=item teardown_repository
+
+=item repository_directory
+
+=item record_results
+
+=back
+

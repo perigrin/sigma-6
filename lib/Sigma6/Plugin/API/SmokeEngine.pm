@@ -8,3 +8,19 @@ requires qw(deps_command build_command);
 
 1;
 __END__
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 REQUIRED METHODS
+
+=over4 
+
+=item deps_command
+
+=item build_command
+
+=item smoke_build
+
+=back 

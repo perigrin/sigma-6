@@ -4,3 +4,7 @@ package Sigma6::Plugin::API;
 
 1;
 __END__
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION

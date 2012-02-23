@@ -1,8 +1,7 @@
 package Sigma6::Web;
-use v5.10;
 use Moose;
 
-# ABSTRACT: A small web front-end for Sigma6
+# ABSTRACT: The Web Front-End for Sigma6
 
 use Sigma6::Config;
 use Plack::Request;
@@ -146,3 +145,86 @@ sub DELETE {
 }
 1;
 __END__
+
+=head1 NAME 
+
+Sigma6::Web
+
+=head1 SYNOPSIS
+
+    #!/usr/bin/env perl
+    use strict;
+    use warnings;
+
+    use lib qw(lib);
+    use Sigma6;
+    use Sigma6::Config::GitLike;
+
+    my $c = Sigma6::Config::GitLike->new();
+    $c->load( $ENV{PWD} );
+    my $app = Sigma6::Web->new( config => $c )->as_psgi;
+
+
+=head1 DESCRIPTION
+
+This is a Plack application for handling the web portion of the Sigma6 CI
+engine. Currently only two URIs are supported.
+
+=head1 RESOURCES
+
+=over 4 
+
+=item GET /
+
+Handled by Plack::App::File, this returns the index.html asset from the
+share directory. This is the base page for the default HTML/JS client.
+
+This will respond with 200 on success. 
+
+=item GET /static/*
+
+Handle by Plack::Middleware::Static, this returns the *other* static assets
+for the default HTML/JS client.
+
+This will respond with 200 on success.
+
+=item GET /builds
+
+Retrieve the represntation of all of the current builds known by the C<BuildManager>.
+
+This will respond with 200 on success. If there are no known builds a 404 will
+be issued.
+
+=item POST /builds
+
+Add a new build to the system. The POST body or parmaters are expected to
+contain a key C<builds[target]> that contains the build target URI.
+
+This will respond with 202 on success. The location for the new build will be
+set in the Location HTTP header.
+
+=item GET /builds/:id
+
+Retrieve the represntation of the current build :id known by the C<BuildManager>.
+
+This will respond with 200 on success. If the build is unknown a 404 will be
+issued.
+
+=item DELETE /builds/:id
+
+Remove the build specified by :id from the C<BuildManager>. This will respond
+with 200 on success. New requests for the build will respond with a 404.
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<Plack>
+
+=item L<Plack::App::File>
+
+=item L<Plack::Middleware::Static>
+
+=back

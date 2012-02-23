@@ -1,6 +1,9 @@
 package Sigma6::Plugin::JSON;
 use Moose;
 use namespace::autoclean;
+
+# ABSTRACT: A RenderOutput Plugin for JSON
+
 use JSON::Any;
 
 extends qw(Sigma6::Plugin);
@@ -19,3 +22,23 @@ sub render {
 
 1;
 __END__
+
+
+=head1 NAME
+
+SIgma6::Plugin::JSON
+
+=head1 DESCRIPTION
+
+Render Build Data as JSON.
+
+=head1 METHODS
+
+=over 4
+
+=item render ($response, $data)
+
+Render C<$data> as JSON. Set the response content_type to "application/json".
+
+=back
+

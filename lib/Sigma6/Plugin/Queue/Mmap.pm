@@ -55,3 +55,37 @@ with qw(Sigma6::Plugin::API::Queue);
 
 1;
 __END__
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 ATTRIBUTES
+
+=item file
+
+=item size 
+
+=item record_size
+
+=item mode
+
+=item queue
+
+=head1 METHODS
+
+=over 4
+
+=item file
+
+=item size 
+
+=item record_size
+
+=item mode
+
+=item fetch_build
+
+=item push_build
+
+=back

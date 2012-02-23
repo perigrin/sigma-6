@@ -64,30 +64,51 @@ sub first_from_plugin_with {
 1;
 __END__
 
+=head1 NAME 
+
+Sigma6::Config
+
+=head1 SYNOPSIS
+
+    package Sigma6::Config::Awesome;
+    use Moose
+    with qw(Sigma6::Config);
+
+    sub get_section_config { ... }
+    
+    1;
+    __END__
+
+=head1 DESCRIPTION
+
+C<Sigma6::Config> is a Role that defines the API for the config system, and by
+extension the plugin system.
+
 =head1 METHODS
 
 =over 
 
 =item plugins 
 
-return an ArrayRef of plugins currently registered
+Return an ArrayRef of plugins currently registered
 
-=item find_plugin(CodeRef) 
+=item find_plugin($CodeRef) 
 
-greps through the plugin list for a plugin list for a plugin that causes
+Grep through the plugin list for a plugin list for a plugin that causes
 CodeRef to return true
 
-=item add_plugins (ShortName)
+=item add_plugins ($name)
 
-loads plugins matching ShortName from disk into the Plugin list
+Expand $name into a plugin name, then load and create a new instance of the
+plugin.
 
-=item plugins_with (PluginType)
+=item plugins_with ($Role)
 
-returns a list of plugins that match PluginType
+Returns a list of plugins that match Role
 
-=item first_from_plugin_wtih (PluginType, CodeRef(Plugin))
+=item first_from_plugin_wtih ($role, $CodeRef)
 
-iterates through the plugins that perform PluginType and returns the first
-true value for CodeRef 
+Iterates through the plugins that do $role and returns the first true value
+for $CodeRef. The $CodeRef is called as a method on the plugin. 
 
 =back

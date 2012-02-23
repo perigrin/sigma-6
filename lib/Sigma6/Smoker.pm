@@ -2,7 +2,7 @@ package Sigma6::Smoker;
 use Moose;
 use namespace::autoclean;
 
-# ABSTRACT: The Default Smoker for Sigma6
+# ABSTRACT: The Smoke Driver for Sigma6.
 
 has config => (
     does     => 'Sigma6::Config',
@@ -114,8 +114,9 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
+=head1 NAME 
 
-=head1 NAME Sigma6::Smoker
+Sigma6::Smoker
 
 =head1 SYNOPSIS
 
@@ -132,3 +133,56 @@ __END__
 
     Sigma6::Smoker->new( config => $c )->run();
 
+=head1 DESCRIPTION
+
+This is the main driver for the backend of Sigma6. This drives the smoking process. 
+
+=head1 EVENTS
+
+This is the sequence of events that the Smoker runs through on each build.
+Each of these events is called on the plugins that perform the corresponding
+APIs.
+
+=over 4
+
+=item setup_workspace
+
+Calls C<setup_workspace> with the current build instance on anything that does
+C<SetupWorkspace>.
+
+=item setup_repository
+
+Calls C<setup_repository> with the current build instanceon anything that does
+C<SetupRepository>.
+
+=item setup_smoker
+
+Calls C<setup_smoker> with the current build instance on anything that does
+C<SetupSmoker>.
+
+=item run_smoker
+
+Calls C<run_smoke> with the current build instance on anything that does
+C<RunSMoker>
+
+=item record_results
+
+With the output of each plugin that does C<CheckSmoker>, it calls
+C<record_results> on all plugins that do C<RecordResults>.
+
+=item teardown_smoker
+
+Calls C<teardown_smoker> with the current build instance on anything that does
+C<TeardownSmoker>.
+
+=item teardown_repository
+
+Calls C<teardown_repository> with the current build instanceon anything that does
+C<TeardownRepository>.
+
+=item teardown_workspace
+
+Calls C<teardown_workspace> with the current build instance on anything that does
+C<TeardownWorkspace>.
+
+=back

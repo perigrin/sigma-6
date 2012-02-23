@@ -2,6 +2,8 @@ package Sigma6::Config::Simple;
 use Moose;
 use namespace::autoclean;
 
+# ABSTRACT: A Simple Hash Based Config for Sigma6
+
 has config => (
     traits   => ['Hash'],
     isa      => 'HashRef',
@@ -30,3 +32,31 @@ sub BUILD { $_[0]->add_plugins( $_[0]->sections ) }
 
 1;
 __END__
+
+=head1 NAME 
+
+Sigma6::Config::Simple
+
+=head1 SYNOPSIS
+
+    Sigma6::Config::Simple->new(
+        'BuildManager::Kioku' => { dsn    => 'dbi:SQLite::memory:' },
+        'Logger'              => { config => 'logger.conf' },
+        'JSON'                => {},
+        'Test::Queue'         => {},
+        'TestSmoker'          => {
+            workspace      => tempdir(),
+            smoker_command => 'bin/smoker.pl --config etc/sigma6.ini',
+        },
+        'Git'  => { },
+        'Dzil' => {
+            deps_command  => 'cpanm -L perl5 --installdeps Makefile.PL',
+            build_command => 'prove -I perl5/lib/perl5 -lwrv t/'
+        },
+    );
+
+=head1 DESCRIPTION
+
+This is a simple L<Sigma6::Config> implementation that takes it's
+configuration from a Perl hash. It was built to simplify writing the tests.
+

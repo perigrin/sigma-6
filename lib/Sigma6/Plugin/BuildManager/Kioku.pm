@@ -109,3 +109,63 @@ sub record_results {
 
 1;
 __END__
+
+=head1 SYNOPSIS
+
+    [BuildManager::Kioku]
+    dsn = dbi:SQLite:builds.db
+
+=head1 DESCRIPTION
+
+This module implements the BuildManager API using a KiokuDB store for
+persistence.
+
+=head1 ROLES COMPOSED
+
+=over 4
+
+=item L<Sigma6::Plugin::API::BuildManager>
+
+=item L<Sigma6::Plugin::API::RecordResults>
+
+=back 
+
+=head1 ATTRIBUTES
+
+=over 4
+
+=item dsn
+
+=item model
+
+=back
+
+=head1 METHODS
+
+=over4 
+
+=item 
+
+=item dsn
+
+=item model
+
+=item get_build
+
+=item builds
+
+=item store_build 
+
+=item update_build
+
+=item clear_build 
+
+=item check_all_builds
+
+=item check_build
+
+=item start_build
+
+=item record_results
+
+=back

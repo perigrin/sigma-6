@@ -312,11 +312,16 @@ __PACKAGE__->meta->make_immutable;
 1;
 __END__
 
-=head1 NAME 
+=head1 NAME  
 
 Sigma6::Config::GitLike
 
+=head1 SYNOPSIS
+
+    my $c = Sigma6::Config::GitLike->new();
+    $c->load($ENV{PWD});
+
 =head1 DESCRIPTION
 
-A subclass of L<Config::GitLike> that hooks into the L<Sigma6> plugin system.
-
+A L<Sigma6::Config> implemntation based on L<Config::GitLike>. This is the
+default configuration implementation for C<Sigma6> at this time.

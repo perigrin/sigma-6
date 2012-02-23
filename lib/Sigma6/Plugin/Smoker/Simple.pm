@@ -2,7 +2,7 @@ package Sigma6::Plugin::Smoker::Simple;
 use Moose;
 use namespace::autoclean;
 
-# ABSTRACT: A Default Smoke Manager for unix like systems
+# ABSTRACT: A Smoker Plugin using simple Unix systems calls.
 
 use Cwd qw(chdir getcwd);
 
@@ -139,3 +139,70 @@ sub teardown_workspace {
 __PACKAGE__->meta->make_immutable;
 1;
 __END__
+<<<<<<< HEAD
+=======
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 ROLES COMPOSED
+
+=over 4
+
+=item L<Sigma6::Plugin::API::Smoker>
+
+=item L<Sigma6::Plugin::API::Workspace>
+
+=back
+
+=head1 ATTRIBUTES
+
+=over 4
+
+=item previous_workspace 
+
+=item workspace
+
+=item smoker_command
+
+=item deps_file
+
+=item build_file
+
+=back
+
+=head1 METHODS
+
+=over4
+
+=item previous_workspace
+
+=item workspace
+
+=item smoker_command
+
+=item deps_file
+
+=item build_file
+
+=item check_smoker
+
+=item start_smoker
+
+=item setup_smoker
+
+=item teardown_smoker
+
+=item repository_directory
+
+=item run_smoke
+
+=item teardown_smoke
+
+=item setup_workspace
+
+=item teardown_workspace
+
+=back
+

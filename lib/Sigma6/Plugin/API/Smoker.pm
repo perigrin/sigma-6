@@ -12,3 +12,24 @@ with qw(
 
 1;
 __END__
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<Sigma6::Plugin::API::SetupSmoker>
+
+=item L<Sigma6::Plugin::API::CheckSmoker>
+
+=item L<Sigma6::Plugin::API::StartSmoker>
+
+=item L<Sigma6::Plugin::API::RunSmoker>
+
+=item L<Sigma6::Plugin::API::TeardownSmoker>
+
+=back
+

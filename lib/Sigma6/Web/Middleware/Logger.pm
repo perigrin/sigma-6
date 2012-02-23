@@ -2,7 +2,7 @@ package Sigma6::Web::Middleware::Logger;
 use Moose;
 use namespace::autoclean;
 
-# ABSTRACT: Turn baubles into trinkets
+# ABSTRACT: Logging for Plack that use the Sigma6 loggers.
 
 extends qw(Plack::Middleware);
 
@@ -25,6 +25,27 @@ sub call {
     $self->app->($env);
 }
 
-#__PACKAGE__->meta->make_immutable;
 1;
 __END__
+
+=head1 NAME 
+
+Sigma6::Web::Middleware::Logger
+
+=head1 SYNOPSIS
+
+    builder { 
+    ...
+        enable '+Sigma6::Web::Middleware::Logger' => (
+            config => $self->config,
+        );
+    ...
+    }
+    
+=head1 DESCRIPTION
+
+This is Logging middleware to use the Sigma6 plugin system for logging in
+Plack. It sets $env->{'psgix.logger'} to a subroutine that take standard Plack
+logging directives, C<{ level => $lvl, message => $message}>, and passes them
+to the plugins that do the Logger API.
+

@@ -45,6 +45,14 @@ __END__
 
 Implements the Logging API using a Log4perl instance. 
 
+=head1 ROLES COMPOSED
+
+=over 4
+
+=item Sigma6::Plugin::API::Logger
+
+=back
+
 =head1 ATTRIBUTES
 
 =over 4
