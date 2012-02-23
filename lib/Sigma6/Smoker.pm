@@ -106,8 +106,9 @@ sub run {
     $self->teardown_smoker;
     $self->teardown_repository;
     $self->teardown_workspace;
-    $self->clear_build_data;
     $self->log( trace => 'Smoker ending run ' . $self->build_data->target );
+    $self->log( trace => 'Smoker clearing build data ' . $self->build_data->target );
+    $self->clear_build_data;
 }
 
 __PACKAGE__->meta->make_immutable;
