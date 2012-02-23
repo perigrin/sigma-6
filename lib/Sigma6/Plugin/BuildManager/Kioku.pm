@@ -2,12 +2,9 @@ package Sigma6::Plugin::BuildManager::Kioku;
 use Moose;
 use namespace::autoclean;
 
-extends qw(Sigma6::Plugin);
+# ABSTRACT: A KiokuDB Backed BuildManager Plugin
 
-with qw(
-    Sigma6::Plugin::API::BuildManager
-    Sigma6::Plugin::API::RecordResults
-);
+extends qw(Sigma6::Plugin);
 
 use KiokuX::Model;
 use Sigma6::Model::Build;
@@ -35,6 +32,11 @@ has model => (
         update_build => 'update',
         clear_build  => 'delete',
     },
+);
+
+with qw(
+    Sigma6::Plugin::API::BuildManager
+    Sigma6::Plugin::API::RecordResults
 );
 
 for my $method (qw(get_build builds store_build update_build clear_build)) {
