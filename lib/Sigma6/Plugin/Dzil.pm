@@ -16,7 +16,8 @@ with qw(Sigma6::Plugin::API::SmokeEngine);
 
 sub smoke_build {
     my ( $self, $build, $smoke ) = @_;
-    return unless -e 'dist.ini';
+    #return unless -e 'dist.ini';
+    $self->log(trace => "Dzil starting smoke_build");
     $self->$smoke($build);
 }
 

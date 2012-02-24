@@ -40,7 +40,7 @@ sub deps_file {
 sub build_file {
     my ( $self, $build ) = @_;
     my $dir = $self->repository_directory($build);
-    "$dir/.sigma6/deps.output";
+    "$dir/.sigma6/build.output";
 }
 
 sub check_smoker {
@@ -92,17 +92,24 @@ sub run_smoke {
 
     my $deps_file  = $self->deps_file($build);
     my $build_file = $self->build_file($build);
-    $self->log( trace => 'Smoke::Simple changing to ' . $build->directory );
-    chdir $build->directory;
+    my $dir        = $self->repository_directory($build);
+    $self->log( trace => 'Smoke::Simple changing to ' . $dir );
+    chdir $dir;
     $self->first_from_plugin_with(
         '-SmokeEngine' => sub {
             $_[0]->smoke_build(
                 $build => sub {
                     my ( $self, $build ) = @_;
-                    my $deps_command  = $self->deps_command($build);
-                    my $build_command = $self->build_command($build);
-                    system 'mkdir .sigma6' unless -e '.sigma6';
+                    my $deps_command  = $self->deps_command;
+                    my $build_command = $self->build_command;
+
+                    unless ( -e '.sigma6' ) {
+                        $self->log( trace => 'mkdir .sigma6' );
+                        system 'mkdir .sigma6';
+                    }
+                    $self->log( trace => "Smoker::Simple $deps_command &> $deps_file" );
                     system "$deps_command &> $deps_file";
+                    $self->log( trace => "Smoker::Simple $build_command &> $build_file" );
                     system "$build_command &> $build_file";
                 },
             );
