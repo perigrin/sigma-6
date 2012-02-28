@@ -1,7 +1,7 @@
 App = Ember.Application.create();
 
 App.Build = Ember.Resource.extend({
-    url: '/builds',
+    resourceUrl: '/builds',
     
     validate: function() {},
     
@@ -79,7 +79,7 @@ App.NewBuildView = Ember.View.extend({
 
         event.preventDefault();
 
-        build.save()
+        build.saveResource()
         .fail(function(e) {
             log(e);
             // App.displayError(e);
@@ -111,7 +111,7 @@ App.ShowBuildView = Ember.View.extend({
         var build = this.get("build");
         var newBuild = App.Build.create({target: build.target});
                 
-        newBuild.save().done(function() {
+        newBuild.saveResource().done(function() {
             App.buildsController.pushObject(build);
         });
     },
@@ -119,7 +119,7 @@ App.ShowBuildView = Ember.View.extend({
     destroyBuild: function() {
         var build = this.get("build");
 
-        build.destroy()
+        build.destroyResource()
         .done(function() {
             App.buildsController.removeObject(build);
         });
