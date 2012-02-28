@@ -2,23 +2,31 @@ App = Ember.Application.create();
 
 App.Build = Ember.Resource.extend({
     url: '/builds',
-    name: 'builds',
-    properties: ['target', 'id', 'revision', 'type', 'description', 'status', 'timestamp'],
-
+    
     validate: function() {},
-    json: Ember.computed(function() {
-        log(this);
-    })
+    
+    startTime: Ember.computed(function() {
+        var d = new Date(0);
+        d.setUTCSeconds(this.get("start_time"));
+        return d.toISOString();
+    }),
+    stopTime: Ember.computed(function() {
+        if( ! this.get("stop_time")) { return }
+        var d = new Date(0);
+        d.setUTCSeconds(this.get("stop_time"));
+        return d.toISOString();
+    }),
+
 });
 
 App.buildsController = Ember.ResourceController.create({
-    type: App.Build,
-    url: '/builds',
+    resourceType: App.Build,
+    resourceUrl: '/builds',
 
     findAll: function() {
       var self = this;
       return jQuery.ajax({
-        url: this._url(),
+        url: this._resourceUrl(),
         dataType: 'json',
         type: 'GET'
       }).done( function(json) {
@@ -118,9 +126,9 @@ App.ShowBuildView = Ember.View.extend({
     }
 });
 
-App.fullBuildView = Ember.View.extend({
-    templateName: 'full-build-template',
-    classNames: ['full-build'],
+App.statusView = Ember.View.extend({
+    templateName: 'status-template',
+    classNames: ['status'],
     
 })
 

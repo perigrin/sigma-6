@@ -77,8 +77,12 @@ sub start_smoker {
     }
 }
 
-sub setup_smoker    { }
-sub teardown_smoker { }
+sub setup_smoker { }
+
+sub teardown_smoker {
+    my ( $self, $build ) = @_;
+    $self->repository_directory($build) . '/.sigma6';
+}
 
 sub repository_directory {
     my ( $self, $build ) = @_;
@@ -107,9 +111,11 @@ sub run_smoke {
                         $self->log( trace => 'mkdir .sigma6' );
                         system 'mkdir .sigma6';
                     }
-                    $self->log( trace => "Smoker::Simple $deps_command &> $deps_file" );
+                    $self->log( trace =>
+                            "Smoker::Simple $deps_command &> $deps_file" );
                     system "$deps_command &> $deps_file";
-                    $self->log( trace => "Smoker::Simple $build_command &> $build_file" );
+                    $self->log( trace =>
+                            "Smoker::Simple $build_command &> $build_file" );
                     system "$build_command &> $build_file";
                 },
             );

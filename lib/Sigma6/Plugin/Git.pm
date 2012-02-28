@@ -75,7 +75,7 @@ sub repository {
 
 sub revision {
     my ( $self, $build ) = @_;
-    $self->log( trace => 'Git revision id' );
+    $self->log( trace => 'Git revision' );
     return $build->revision if $build->revision;
     my $target = $self->target($build);
     my $repo   = $self->repository($build);

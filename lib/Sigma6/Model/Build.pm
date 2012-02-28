@@ -4,25 +4,37 @@ use namespace::autoclean;
 
 # ABSTRACT: An Object to represent builds in Sigma6.
 
-use Digest::SHA1 qw(sha1_hex);
+use Digest::SHA qw(sha1_hex);
 use MooseX::Storage;
 
 with Storage( format => 'JSON' );
 
-has [qw(target revision type description directory)] => (
-    is  => 'ro',
+has [qw(type target revision description directory)] => (
     isa => 'Str',
+    is  => 'ro',
 );
 
-has status => ( isa => 'Str', is => 'rw', );
+has status => (
+    isa => 'Str',
+    is  => 'rw',
+);
 
-has timestamp => ( is => 'ro', lazy => 1, default => sub {time} );
+has start_time => (
+    is      => 'ro',
+    default => sub {time}
+);
+
+has stop_time => (
+    is      => 'ro',
+    lazy    => 1,
+    default => sub {time}
+);
 
 has id => (
     is      => 'ro',
     lazy    => 1,
     default => sub {
-        sha1_hex( $_[0]->revision . $_[0]->timestamp );
+        sha1_hex join '', map { $_[0]->$_ } qw(revision target start_time);
     },
 );
 

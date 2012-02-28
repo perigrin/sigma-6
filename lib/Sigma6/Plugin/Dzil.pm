@@ -16,7 +16,7 @@ with qw(Sigma6::Plugin::API::SmokeEngine);
 
 sub smoke_build {
     my ( $self, $build, $smoke ) = @_;
-    #return unless -e 'dist.ini';
+    return unless -e 'dist.ini';
     $self->log(trace => "Dzil starting smoke_build");
     $self->$smoke($build);
 }
@@ -32,7 +32,7 @@ Sigma6::Plugin::Dzil
 =head1 SYNOPSIS
 
     [Dzil]
-    deps_command  = cpanm -L perl5 --installdeps Makefile.PL
+    deps_command  =  dzil authordeps | cpanm -L perl5 ; dzil listdeps | cpanm -L perl5
     build_command = prove -I perl5/lib/perl5 -lwrv t/
 
 =head1 DESCRIPTION 

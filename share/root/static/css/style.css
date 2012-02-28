@@ -48,3 +48,10 @@ a.button {
     border: 1px solid black;
     width: 80ex;
 }
+
+.build { }
+
+.build .commands, .build .details  { display: inline-block; vertical-align: top }
+dl.details { margin: 0px; }
+dl.details dt { float: left; clear: both; width: 10ex; }
+dl.details dd  {     width: 100% }

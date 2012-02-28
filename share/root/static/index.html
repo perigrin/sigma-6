@@ -28,17 +28,23 @@
         </div>
         </script>
         <script type="text/x-handlebars" data-template-name="show-template">
-        <span class="commands">
-                 <a class="button" href="#" {{action "rebuildBuild"}}>Rebuild</a>
-                 <a class="button" href="#" {{action "destroyBuild"}}>Clear</a>
-        </span>
-                <a href="#" {{action "toggleFullView"}}>{{build.timestamp}} {{build.target}}</a>
+        <div class="build" {{action "toggleFullView"}}>
+            <div class="commands">
+                     <a class="button" href="#" {{action "rebuildBuild"}}>Rebuild</a>
+                     <a class="button" href="#" {{action "destroyBuild"}}>Clear</a>
+            </div>
+            <dl class="details">
+                <dt>Revision</dt><dd>{{build.revision}}</dd>            
+                <dt>Target</dt><dd>{{build.target}}</dd>
+                <dt>Start Time</dt><dd>{{build.startTime}}</dd>
+                <dt>Stop Time</dt><dd>{{build.stopTime}}</dd>                
                 {{#if fullView}}
-                        {{view App.fullBuildView buildBinding="build"}}
+                <dt>Status<dt><dd>{{view App.statusView buildBinding="build"}}<dd>
                 {{/if}}
+            </dl>
+        </div>
         </script>
-        <script type="text/x-handlebars" data-template-name="full-build-template">
-                <p>{{build.target}}</p>
+        <script type="text/x-handlebars" data-template-name="status-template">
                 <div style="overflow: auto; max-height: 100ex">
                 <pre style="font-size: 10px">{{build.status}}</pre>
                 </div>

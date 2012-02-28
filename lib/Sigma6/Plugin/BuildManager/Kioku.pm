@@ -57,12 +57,14 @@ sub check_all_builds {
 sub check_build {
     my ( $self, $build ) = @_;
     $self->log( trace => 'BuildManager checking build' );
-    $build->status(
-        $self->first_from_plugin_with(
-            '-CheckSmoker' => sub { $_[0]->check_smoker($build) }
-        )
-    );
-    $self->update_build($build);
+    unless ( $build->status ) {
+        $build->status(
+            $self->first_from_plugin_with(
+                '-CheckSmoker' => sub { $_[0]->check_smoker($build) }
+            )
+        );
+        $self->update_build($build);
+    }
     return $build;
 }
 
@@ -105,7 +107,9 @@ sub record_results {
     $self->log( trace => 'BuildManager recording results' );
     $self->log( debug => $results );
     $build->status($results);
+    $build->stop_time;
     $self->store_build($build);
+
     return;
 }
 
