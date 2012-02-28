@@ -1,11 +1,14 @@
 App = Ember.Application.create();
 
 App.Build = Ember.Resource.extend({
+    resourceName: 'builds',
     resourceUrl: '/builds',
+    resourceProperties: ['id', 'target',],
     
     validate: function() {},
     
     startTime: Ember.computed(function() {
+        if (this.isNew()) { return new Date(Date.now()).toISOString(); }
         var d = new Date(0);
         d.setUTCSeconds(this.get("start_time"));
         return d.toISOString();
